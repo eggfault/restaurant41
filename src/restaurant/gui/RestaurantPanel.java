@@ -27,7 +27,7 @@ public class RestaurantPanel extends JPanel {
     //Table[] tables = new Table[nTables];
     Table[] tables = new Table[gridX * gridY];
 
-    Restaurant restaurant =  new Restaurant("Welcome to csci201's Restaurant",
+    Restaurant restaurant =  new Restaurant("George Li's Restaurant",
 					    gridX, gridY, grid, tables);
     
     //Host, cook, waiters and customers
