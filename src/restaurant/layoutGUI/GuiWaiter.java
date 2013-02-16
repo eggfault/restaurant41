@@ -9,7 +9,7 @@ public class GuiWaiter
     private Restaurant restaurant;
     private GuiCustomer customer;
     private Food food;
-    private boolean customerPresent, foodPresent;
+    private boolean customerPresent, foodPresent, billPresent;
     private String name;
     
     public GuiWaiter(String name, Color color, Restaurant restaurant)
@@ -20,6 +20,7 @@ public class GuiWaiter
         this.restaurant =   restaurant;
         customerPresent =   false;
         foodPresent     =   false;
+        billPresent		=	false;
         this.x          =   restaurant.getWaiterX();
         this.y          =   restaurant.getWaiterY();
         this.placeWaiter();
@@ -50,29 +51,35 @@ public class GuiWaiter
         if (customerPresent)
         {
             restaurant.moveWaiterCustomer(this.x, this.y, x, y, color, name, customer.getName());
-            this.x          =   x;
-            this.y          =   y;
+            this.x = x;
+            this.y = y;
             customer.move(x, y);            
         }
         else if (foodPresent)
         {
             restaurant.moveWaiterFood(this.x, this.y, x, y, color, name, food.getName());
-            this.x          =   x;
-            this.y          =   y;
+            this.x = x;
+            this.y = y;
             food.move(x, y);
+        }
+        else if (billPresent)
+        {
+        	restaurant.moveWaiterBill(this.x, this.y, x, y, color, name);
+        	this.x = x;
+        	this.y = y;
         }
         else
         {
             restaurant.moveWaiter(this.x, this.y, x, y, color, name);
-            this.x          =   x;
-            this.y          =   y;
+            this.x = x;
+            this.y = y;
         }
     }
     
     public void pickUpCustomer(GuiCustomer customer)
     {
-        customerPresent     =   true;
-        this.customer       =   customer;
+        customerPresent = true;
+        this.customer = customer;
         customer.leave();
         customer.move(x, y);
         this.move(x, y);
@@ -80,7 +87,7 @@ public class GuiWaiter
     
     public void seatCustomer(Table table)
     {
-        customerPresent     =   false;
+        customerPresent = false;
         customer.move(table.seatX(), table.seatY());
         customer.placeCustomer();
         this.move(this.x, this.y);
@@ -88,8 +95,9 @@ public class GuiWaiter
     
     public void pickUpFood(Food food)
     {
-        foodPresent         =   true;
-        this.food           =   food;
+    	System.out.println("Picking Up Food");
+        foodPresent = true;
+        this.food = food;
         food.remove();
         food.move(x, y);
         this.move(x, y);
@@ -97,9 +105,16 @@ public class GuiWaiter
     
     public void serveFood(Table table)
     {
-        foodPresent         =   false;
+    	System.out.println("Serving Food");
+        foodPresent = false;
         food.move(table.foodX(), table.foodY());
         food.placeFood();
+        this.move(this.x, this.y);
+    }
+    
+    public void giveBill()
+    {
+        billPresent = true;
         this.move(this.x, this.y);
     }
 }

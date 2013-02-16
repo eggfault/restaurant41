@@ -31,8 +31,9 @@ public class RestaurantPanel extends JPanel {
 					    gridX, gridY, grid, tables);
     
     //Host, cook, waiters and customers
-    private HostAgent host = new HostAgent("Prof. W.", nTables);
-    private CookAgent cook = new CookAgent("W. Puck", restaurant);
+    private HostAgent host = new HostAgent("Capt. Krabs", nTables);
+    private CookAgent cook = new CookAgent("Spongebob", restaurant);
+    private CashierAgent cashier = new CashierAgent("Squidward", restaurant);
     private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
     private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
 
@@ -151,23 +152,23 @@ public class RestaurantPanel extends JPanel {
     /** Adds a customer or waiter to the appropriate list
      * @param type indicates whether the person is a customer or waiter
      * @param name name of person */
-    public void addPerson(String type, String name){
-	
-	if(type.equals("Customers")){
-	    CustomerAgent c = new CustomerAgent(name, gui, restaurant);
-	    c.setHost(host);
-	    customers.add(c);
-	    c.startThread(); //Customer is fsm.
-	    c.setHungry();
-	} else if(type.equals("Waiters")){
-	    AStarTraversal aStarTraversal = new AStarTraversal(grid);
-	    WaiterAgent w = new WaiterAgent(name, aStarTraversal, restaurant, tables);
-	    w.setHost(host);
-	    w.setCook(cook);
-	    host.setWaiter(w);
-	    waiters.add(w);
-	    w.startThread();
-	}
+    public void addPerson(String type, String name) {
+		if(type.equals("Customers")) {
+		    CustomerAgent c = new CustomerAgent(name, gui, restaurant);
+		    c.setHost(host);
+		    customers.add(c);
+		    c.startThread(); //Customer is fsm.
+		    c.setHungry();
+		}
+		else if(type.equals("Waiters")) {
+		    AStarTraversal aStarTraversal = new AStarTraversal(grid);
+		    WaiterAgent w = new WaiterAgent(name, aStarTraversal, restaurant, tables);
+		    w.setHost(host);
+		    w.setCook(cook);
+		    host.setWaiter(w);
+		    waiters.add(w);
+		    w.startThread();
+		}
     }	
 
 	public void addTable() {

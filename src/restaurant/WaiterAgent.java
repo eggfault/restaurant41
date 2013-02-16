@@ -335,7 +335,9 @@ public class WaiterAgent extends Agent {
 		print("Giving " + customer.cmr +"'s bill.");
 		Position tablePos = new Position(tables[customer.tableNum].getX()-1,
 						 tables[customer.tableNum].getY()+1);
+		guiWaiter.giveBill();
 		guiMoveFromCurrentPostionTo(tablePos);
+		
     }
     
     void DoGiveFoodToCustomer(MyCustomer customer) {
@@ -348,6 +350,7 @@ public class WaiterAgent extends Agent {
 		guiMoveFromCurrentPostionTo(tablePos);
 		guiWaiter.serveFood(tables[customer.tableNum]);
     }
+    
     void DoClearingTable(final MyCustomer customer) {
 		print("Clearing table " + (customer.tableNum+1) + " (1500 milliseconds)");
 		timer.schedule(new TimerTask(){

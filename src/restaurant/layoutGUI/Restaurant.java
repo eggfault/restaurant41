@@ -58,7 +58,7 @@ public class Restaurant extends JFrame implements MouseListener
         }
         waiterNum   =   new int[x*y][2];
         tableCnt    =   0;
-        animDelay   =   1000;
+        animDelay   =   50;					// change this to 1000 in later version
         addMouseListener(this);    
     }
     
@@ -363,6 +363,21 @@ public class Restaurant extends JFrame implements MouseListener
         buttons[oldx-1][oldy-1].setText(defaultText);
         buttons[newx-1][newy-1].setForeground(color);
         buttons[newx-1][newy-1].setText(waiterName + foodName);
+        try
+        {
+            Thread.sleep(animDelay);
+        }
+        catch(Exception e) {}
+    }
+    
+    protected void moveWaiterBill(int oldx, int oldy, int newx, int newy, Color color, String waiterName)
+    {
+        if (waiterName.length() > 2)
+            waiterName = waiterName.substring(0, 2);
+        buttons[oldx-1][oldy-1].setForeground(new Color(255, 255, 255));
+        buttons[oldx-1][oldy-1].setText(defaultText);
+        buttons[newx-1][newy-1].setForeground(color);
+        buttons[newx-1][newy-1].setText(waiterName);	// + "$" maybe?
         try
         {
             Thread.sleep(animDelay);
