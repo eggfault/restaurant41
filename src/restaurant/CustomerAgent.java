@@ -26,11 +26,13 @@ public class CustomerAgent extends Agent {
    // ** Agent state **
     private boolean isHungry = false; //hack for gui
     public enum AgentState
-	    {DoingNothing, WaitingInRestaurant, SeatedWithMenu, WaiterCalled, WaitingForFood, Eating};
+	    {DoingNothing, WaitingInRestaurant, SeatedWithMenu, WaiterImReadyToOrder, WaitingForFood, Eating,
+    	WaiterImReadyToPay};
 	//{NO_ACTION,NEED_SEATED,NEED_DECIDE,NEED_ORDER,NEED_EAT,NEED_LEAVE};
     private AgentState state = AgentState.DoingNothing;//The start state
     public enum AgentEvent 
-	    {gotHungry, beingSeated, decidedChoice, waiterToTakeOrder, foodDelivered, doneEating};
+	    {gotHungry, beingSeated, decidedChoice, waiterToTakeOrder, foodDelivered, doneEating,
+    	waiterToGiveBill};
     List<AgentEvent> events = new ArrayList<AgentEvent>();
     
     /** Constructor for CustomerAgent class 
@@ -79,7 +81,11 @@ public class CustomerAgent extends Agent {
 	events.add(AgentEvent.waiterToTakeOrder);
 	stateChanged(); 
     }
-
+    /** Waiter sends this message to give the customer his or her bill */
+    public void msgHeresYourBill(){
+	events.add(AgentEvent.waiterToGiveBill);
+	stateChanged(); 
+    }
     /** Waiter sends this when the food is ready 
      * @param choice the food that is done cooking for the customer to eat */
     public void msgHereIsYourFood(String choice) {
@@ -92,7 +98,7 @@ public class CustomerAgent extends Agent {
 	stateChanged(); 
     }
 
-
+    // *** SCHEDULER ***
     /** Scheduler.  Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
 	if (events.isEmpty()) return false;
@@ -116,12 +122,12 @@ public class CustomerAgent extends Agent {
 	}
 	if (state == AgentState.SeatedWithMenu) {
 	    if (event == AgentEvent.decidedChoice)	{
-		callWaiter();
-		state = AgentState.WaiterCalled;
+		readyToOrder();
+		state = AgentState.WaiterImReadyToOrder;
 		return true;
 	    }
 	}
-	if (state == AgentState.WaiterCalled) {
+	if (state == AgentState.WaiterImReadyToOrder) {
 	    if (event == AgentEvent.waiterToTakeOrder)	{
 		orderFood();
 		state = AgentState.WaitingForFood;
@@ -137,8 +143,16 @@ public class CustomerAgent extends Agent {
 	}
 	if (state == AgentState.Eating) {
 	    if (event == AgentEvent.doneEating)	{
+		//leaveRestaurant(); don't leave restaurant yet!
+	    readyToPay();
+	    state = AgentState.WaiterImReadyToPay;
+		return true;
+	    }
+	}
+	if (state == AgentState.WaiterImReadyToPay) {
+	    if (event == AgentEvent.waiterToGiveBill) {
 		leaveRestaurant();
-		state = AgentState.DoingNothing;
+	    state = AgentState.DoingNothing;
 		return true;
 	    }
 	}
@@ -167,12 +181,21 @@ public class CustomerAgent extends Agent {
 	    3000);//how long to wait before running task
 	stateChanged();
     }
-    private void callWaiter(){
+    
+    /** Tells waiter the customer is ready to order food. */
+    private void readyToOrder(){
 	print("I decided!");
 	waiter.msgImReadyToOrder(this);
 	stateChanged();
     }
-
+    
+    /** Tells waiter the customer is ready to pay for the food (finished eating) */
+    private void readyToPay(){
+	print("I am ready to pay.");
+	waiter.msgImReadyToPay(this);
+	stateChanged();
+    }
+    
     /** Picks a random choice from the menu and sends it to the waiter */
     private void orderFood(){
 	String choice = menu.choices[(int)(Math.random()*4)];
@@ -188,7 +211,8 @@ public class CustomerAgent extends Agent {
 	    public void run() {
 		msgDoneEating();    
 	    }},
-	    getHungerLevel() * 1000);//how long to wait before running task
+	    getHungerLevel() * 0);//how long to wait before running task
+		// getHungerLevel() * 1000); change back to this in final version
 	stateChanged();
     }
     

@@ -84,8 +84,9 @@ public class HostAgent extends Agent {
 	tables[tableNum].occupied = false;
 	stateChanged();
     }
-
-    /** Scheduler.  Determine what action is called for, and do it. */
+    
+    // *** SCHEDULER ***
+    /** Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
 	
 	if(!waitList.isEmpty() && !waiters.isEmpty()){
@@ -95,7 +96,7 @@ public class HostAgent extends Agent {
 		    nextWaiter = (nextWaiter+1)%waiters.size();
 		}
 	    }
-	    print("picking waiter number:"+nextWaiter);
+	    print("Picking waiter number:"+nextWaiter);
 	    //Then runs through the tables and finds the first unoccupied 
 	    //table and tells the waiter to sit the first customer at that table
 	    for(int i=0; i < nTables; i++){

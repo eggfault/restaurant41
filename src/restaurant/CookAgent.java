@@ -150,7 +150,7 @@ public class CookAgent extends Agent {
     }
 
     private void DoCooking(final Order order){
-	print("Cooking:" + order + " for table:" + (order.tableNum+1));
+	print("Cooking: " + order + " for table:" + (order.tableNum+1));
 	//put it on the grill. gui stuff
 	order.food = new Food(order.choice.substring(0,2),new Color(0,255,255), restaurant);
 	order.food.cookFood();

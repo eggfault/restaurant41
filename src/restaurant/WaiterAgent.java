@@ -21,7 +21,7 @@ public class WaiterAgent extends Agent {
     //State constants for Customers
 
     public enum CustomerState 
-	{NEED_SEATED,READY_TO_ORDER,ORDER_PENDING,ORDER_READY,IS_DONE,NO_ACTION};
+	{NEED_SEATED, READY_TO_ORDER, ORDER_PENDING, ORDER_READY, IS_DONE, NO_ACTION, READY_TO_PAY};
 
     Timer timer = new Timer();
 
@@ -94,7 +94,7 @@ public class WaiterAgent extends Agent {
 	stateChanged();
     }
 
-    /** Customer sends this when they are ready.
+    /** Customer sends this when they are ready to order.
      * @param customer customer who is ready to order.
      */
     public void msgImReadyToOrder(CustomerAgent customer){
@@ -108,6 +108,21 @@ public class WaiterAgent extends Agent {
 	    }
 	}
 	System.out.println("msgImReadyToOrder in WaiterAgent, didn't find him?");
+    }
+    
+    /** Customer sends this when they are ready to pay.
+     * @param customer customer who is ready to order.
+     */
+    public void msgImReadyToPay(CustomerAgent customer){
+	for(int i=0; i < customers.size(); i++){
+	    //if(customers.get(i).cmr.equals(customer)){
+	    if (customers.get(i).cmr == customer){
+		customers.get(i).state = CustomerState.READY_TO_PAY;
+		stateChanged();
+		return;
+	    }
+	}
+	System.out.println("msgImReadyToPay in WaiterAgent, didn't find him?");
     }
 
     /** Customer sends this when they have decided what they want to eat 
@@ -165,49 +180,57 @@ public class WaiterAgent extends Agent {
     protected boolean pickAndExecuteAnAction() {
 	//print("in waiter scheduler");
 
-	//Runs through the customers for each rule, so 
-	//the waiter doesn't serve only one customer at a time
+	// Runs through the customers for each rule, so 
+	// the waiter doesn't serve only one customer at a time
 	if(!customers.isEmpty()){
-	    //System.out.println("in scheduler, customers not empty:");
-	    //Gives food to customer if the order is ready
-	    for(MyCustomer c:customers){
-		if(c.state == CustomerState.ORDER_READY) {
-		    giveFoodToCustomer(c);
-		    return true;
-		}
+	    // System.out.println("in scheduler, customers not empty:");
+	    // Gives food to customer if the order is ready
+	    for(MyCustomer c:customers) {
+			if(c.state == CustomerState.ORDER_READY) {
+			    giveFoodToCustomer(c);
+			    return true;
+			}
 	    }
-	    //Clears the table if the customer has left
-	    for(MyCustomer c:customers){
-		if(c.state == CustomerState.IS_DONE) {
-		    clearTable(c);
-		    return true;
-		}
-	    }
-
-	    //Seats the customer if they need it
-	    for(MyCustomer c:customers){
-		if(c.state == CustomerState.NEED_SEATED){
-		    seatCustomer(c);
-		    return true;
-		}
+	    // Clears the table if the customer has left
+	    for(MyCustomer c:customers) {
+			if(c.state == CustomerState.IS_DONE) {
+			    clearTable(c);
+			    return true;
+			}
 	    }
 
-	    //Gives all pending orders to the cook
-	    for(MyCustomer c:customers){
-		if(c.state == CustomerState.ORDER_PENDING){
-		    giveOrderToCook(c);
-		    return true;
-		}
+	    // Seats the customer if they need it
+	    for(MyCustomer c:customers) {
+			if(c.state == CustomerState.NEED_SEATED){
+			    seatCustomer(c);
+			    return true;
+			}
 	    }
 
-	    //Takes new orders for customers that are ready
-	    for(MyCustomer c:customers){
-		//print("testing for ready to order"+c.state);
-		if(c.state == CustomerState.READY_TO_ORDER) {
-		    takeOrder(c);
-		    return true;
-		}
-	    }	    
+	    // Gives all pending orders to the cook
+	    for(MyCustomer c:customers) {
+			if(c.state == CustomerState.ORDER_PENDING) {
+			    giveOrderToCook(c);
+			    return true;
+			}
+	    }
+
+	    // Takes new orders for customers that are ready to order
+	    for(MyCustomer c:customers) {
+			//print("testing for ready to order"+c.state);
+			if(c.state == CustomerState.READY_TO_ORDER) {
+			    takeOrder(c);
+			    return true;
+			}
+	    }
+	    
+	  // Gives customers their bills when they are finished eating
+	    for(MyCustomer c:customers) {
+			if(c.state == CustomerState.READY_TO_PAY) {
+			    giveBill(c);
+			    return true;
+			}
+	    }	
 	}
 	if (!currentPosition.equals(originalPosition)) {
 	    DoMoveToOriginalPosition();//Animation thing
@@ -222,7 +245,6 @@ public class WaiterAgent extends Agent {
 
     // *** ACTIONS ***
     
-
     /** Seats the customer at a specific table 
      * @param customer customer that needs seated */
     private void seatCustomer(MyCustomer customer) {
@@ -231,15 +253,25 @@ public class WaiterAgent extends Agent {
 	customer.cmr.msgFollowMeToTable(this, new Menu());
 	stateChanged();
     }
+    
     /** Takes down the customers order 
      * @param customer customer that is ready to order */
     private void takeOrder(MyCustomer customer) {
-	DoTakeOrder(customer); //animation
-	customer.state = CustomerState.NO_ACTION;
-	customer.cmr.msgWhatWouldYouLike();
-	stateChanged();
+		DoTakeOrder(customer); //animation
+		customer.state = CustomerState.NO_ACTION;
+		customer.cmr.msgWhatWouldYouLike();
+		stateChanged();
     }
 
+    /** Gives the customer his or her bill
+     * @param customer customer that is ready to order */
+    private void giveBill(MyCustomer customer) {
+		//DoTakeOrder(customer); //animation
+		customer.state = CustomerState.NO_ACTION;
+		customer.cmr.msgHeresYourBill();
+		stateChanged();
+    }
+    
     /** Gives any pending orders to the cook 
      * @param customer customer that needs food cooked */
     private void giveOrderToCook(MyCustomer customer) {
