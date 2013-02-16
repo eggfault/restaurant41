@@ -266,7 +266,7 @@ public class WaiterAgent extends Agent {
     /** Gives the customer his or her bill
      * @param customer customer that is ready to order */
     private void giveBill(MyCustomer customer) {
-		//DoTakeOrder(customer); //animation
+		DoGiveBill(customer); //animation
 		customer.state = CustomerState.NO_ACTION;
 		customer.cmr.msgHeresYourBill();
 		stateChanged();
@@ -312,59 +312,68 @@ public class WaiterAgent extends Agent {
     }
 
     // Animation Actions
-    void DoSeatCustomer (MyCustomer customer){
-	print("Seating " + customer.cmr + " at table " + (customer.tableNum+1));
-	//move to customer first.
-	GuiCustomer guiCustomer = customer.cmr.getGuiCustomer();
-	guiMoveFromCurrentPostionTo(new Position(guiCustomer.getX()+1,guiCustomer.getY()));
-	guiWaiter.pickUpCustomer(guiCustomer);
-	Position tablePos = new Position(tables[customer.tableNum].getX()-1,
-					 tables[customer.tableNum].getY()+1);
-	guiMoveFromCurrentPostionTo(tablePos);
-	guiWaiter.seatCustomer(tables[customer.tableNum]);
+    void DoSeatCustomer (MyCustomer customer) {
+		print("Seating " + customer.cmr + " at table " + (customer.tableNum+1));
+		//move to customer first.
+		GuiCustomer guiCustomer = customer.cmr.getGuiCustomer();
+		guiMoveFromCurrentPostionTo(new Position(guiCustomer.getX()+1,guiCustomer.getY()));
+		guiWaiter.pickUpCustomer(guiCustomer);
+		Position tablePos = new Position(tables[customer.tableNum].getX()-1,
+						 tables[customer.tableNum].getY()+1);
+		guiMoveFromCurrentPostionTo(tablePos);
+		guiWaiter.seatCustomer(tables[customer.tableNum]);
     }
-    void DoTakeOrder(MyCustomer customer){
-	print("Taking " + customer.cmr +"'s order.");
-	Position tablePos = new Position(tables[customer.tableNum].getX()-1,
-					 tables[customer.tableNum].getY()+1);
-	guiMoveFromCurrentPostionTo(tablePos);
+    
+    void DoTakeOrder(MyCustomer customer) {
+		print("Taking " + customer.cmr +"'s order.");
+		Position tablePos = new Position(tables[customer.tableNum].getX()-1,
+						 tables[customer.tableNum].getY()+1);
+		guiMoveFromCurrentPostionTo(tablePos);
     }
-    void DoGiveFoodToCustomer(MyCustomer customer){
-	print("Giving finished order of " + customer.choice +" to " + customer.cmr);
-	Position inFrontOfGrill = new Position(customer.food.getX()-1,customer.food.getY());
-	guiMoveFromCurrentPostionTo(inFrontOfGrill);//in front of grill
-	guiWaiter.pickUpFood(customer.food);
-	Position tablePos = new Position(tables[customer.tableNum].getX()-1,
-					 tables[customer.tableNum].getY()+1);
-	guiMoveFromCurrentPostionTo(tablePos);
-	guiWaiter.serveFood(tables[customer.tableNum]);
+    
+    void DoGiveBill(MyCustomer customer) {
+		print("Giving " + customer.cmr +"'s bill.");
+		Position tablePos = new Position(tables[customer.tableNum].getX()-1,
+						 tables[customer.tableNum].getY()+1);
+		guiMoveFromCurrentPostionTo(tablePos);
     }
-    void DoClearingTable(final MyCustomer customer){
-	print("Clearing table " + (customer.tableNum+1) + " (1500 milliseconds)");
-	timer.schedule(new TimerTask(){
-	    public void run(){		    
-		endCustomer(customer);
-	    }
-	}, 1500);
+    
+    void DoGiveFoodToCustomer(MyCustomer customer) {
+		print("Giving finished order of " + customer.choice +" to " + customer.cmr);
+		Position inFrontOfGrill = new Position(customer.food.getX()-1,customer.food.getY());
+		guiMoveFromCurrentPostionTo(inFrontOfGrill);//in front of grill
+		guiWaiter.pickUpFood(customer.food);
+		Position tablePos = new Position(tables[customer.tableNum].getX()-1,
+						 tables[customer.tableNum].getY()+1);
+		guiMoveFromCurrentPostionTo(tablePos);
+		guiWaiter.serveFood(tables[customer.tableNum]);
+    }
+    void DoClearingTable(final MyCustomer customer) {
+		print("Clearing table " + (customer.tableNum+1) + " (1500 milliseconds)");
+		timer.schedule(new TimerTask(){
+		    public void run(){		    
+			endCustomer(customer);
+		    }
+		}, 1500);
     }
     /** Function called at the end of the clear table timer
      * to officially remove the customer from the waiter's list.
      * @param customer customer who needs removed from list */
-    private void endCustomer(MyCustomer customer){ 
-	print("Table " + (customer.tableNum+1) + " is cleared!");
-	customer.food.remove(); //remove the food from table animation
-	host.msgTableIsFree(customer.tableNum);
-	customers.remove(customer);
-	stateChanged();
+    private void endCustomer(MyCustomer customer) { 
+		print("Table " + (customer.tableNum+1) + " is cleared!");
+		customer.food.remove(); //remove the food from table animation
+		host.msgTableIsFree(customer.tableNum);
+		customers.remove(customer);
+		stateChanged();
     }
-    private void DoMoveToOriginalPosition(){
-	print("Nothing to do. Moving to original position="+originalPosition);
-	guiMoveFromCurrentPostionTo(originalPosition);
+    private void DoMoveToOriginalPosition() {
+		print("Nothing to do. Moving to original position="+originalPosition);
+		guiMoveFromCurrentPostionTo(originalPosition);
     }
 
     //this is just a subroutine for waiter moves. It's not an "Action"
     //itself, it is called by Actions.
-    void guiMoveFromCurrentPostionTo(Position to){
+    void guiMoveFromCurrentPostionTo(Position to) {
 	//System.out.println("[Gaut] " + guiWaiter.getName() + " moving from " + currentPosition.toString() + " to " + to.toString());
 
 	AStarNode aStarNode = (AStarNode)aStar.generalSearch(currentPosition, to);
