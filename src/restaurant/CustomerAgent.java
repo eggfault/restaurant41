@@ -40,26 +40,26 @@ public class CustomerAgent extends Agent {
      * @param gui reference to the gui so the customer can send it messages
      */
     public CustomerAgent(String name, RestaurantGui gui, Restaurant restaurant) {
-	super();
-	this.gui = gui;
-	this.name = name;
-	this.restaurant = restaurant;
-	guiCustomer = new GuiCustomer(name.substring(0,2), new Color(0,255,0), restaurant);
+		super();
+		this.gui = gui;
+		this.name = name;
+		this.restaurant = restaurant;
+		guiCustomer = new GuiCustomer(name.substring(0,2), new Color(0,255,0), restaurant);
     }
     public CustomerAgent(String name, Restaurant restaurant) {
-	super();
-	this.gui = null;
-	this.name = name;
-	this.restaurant = restaurant;
-	guiCustomer = new GuiCustomer(name.substring(0,1), new Color(0,255,0), restaurant);
+		super();
+		this.gui = null;
+		this.name = name;
+		this.restaurant = restaurant;
+		guiCustomer = new GuiCustomer(name.substring(0,1), new Color(0,255,0), restaurant);
     }
     // *** MESSAGES ***
     /** Sent from GUI to set the customer as hungry */
     public void setHungry() {
-	events.add(AgentEvent.gotHungry);
-	isHungry = true;
-	print("I'm hungry");
-	stateChanged();
+		events.add(AgentEvent.gotHungry);
+		isHungry = true;
+		print("I'm hungry");
+		stateChanged();
     }
     /** Waiter sends this message so the customer knows to sit down 
      * @param waiter the waiter that sent the message
@@ -77,25 +77,25 @@ public class CustomerAgent extends Agent {
 	stateChanged(); 
     }
     /** Waiter sends this message to take the customer's order */
-    public void msgWhatWouldYouLike(){
-	events.add(AgentEvent.waiterToTakeOrder);
-	stateChanged(); 
+    public void msgWhatWouldYouLike() {
+		events.add(AgentEvent.waiterToTakeOrder);
+		stateChanged(); 
     }
     /** Waiter sends this message to give the customer his or her bill */
-    public void msgHeresYourBill(){
-	events.add(AgentEvent.waiterToGiveBill);
-	stateChanged(); 
+    public void msgHeresYourBill() {
+		events.add(AgentEvent.waiterToGiveBill);
+		stateChanged(); 
     }
     /** Waiter sends this when the food is ready 
      * @param choice the food that is done cooking for the customer to eat */
-    public void msgHereIsYourFood(String choice) {
-	events.add(AgentEvent.foodDelivered);
-	stateChanged();
+    public void msgHereIsYourFood(MenuItem choice) {
+		events.add(AgentEvent.foodDelivered);
+		stateChanged();
     }
     /** Timer sends this when the customer has finished eating */
     public void msgDoneEating() {
-	events.add(AgentEvent.doneEating);
-	stateChanged(); 
+		events.add(AgentEvent.doneEating);
+		stateChanged(); 
     }
 
     // *** SCHEDULER ***
@@ -152,7 +152,8 @@ public class CustomerAgent extends Agent {
 	if (state == AgentState.WaiterImReadyToPay) {
 	    if (event == AgentEvent.waiterToGiveBill) {
 		//leaveRestaurant();
-	    
+	    // Hack to get bill
+	    System.out.println("End of sim");
 	    state = AgentState.DoingNothing;
 		return true;
 	    }
@@ -199,88 +200,87 @@ public class CustomerAgent extends Agent {
     
     /** Picks a random choice from the menu and sends it to the waiter */
     private void orderFood() {
-		String choice = menu.choices[(int)(Math.random()*4)];
-		print("Ordering the " + choice);
+		MenuItem choice = menu.getRandomItem();
+		print("Ordering the " + choice.getName());
 		waiter.msgHereIsMyChoice(this, choice);
 		stateChanged();
     }
 
     /** Starts a timer to simulate eating */
     private void eatFood() {
-	print("Eating for " + hungerLevel*1000 + " milliseconds.");
-	timer.schedule(new TimerTask() {
-	    public void run() {
-		msgDoneEating();    
-	    }},
-	    getHungerLevel() * 0);//how long to wait before running task
-		// getHungerLevel() * 1000); change back to this in final version
-	stateChanged();
+		print("Eating for " + hungerLevel*1000 + " milliseconds.");
+		timer.schedule(new TimerTask() {
+		    public void run() {
+			msgDoneEating();
+		    }},
+		    getHungerLevel() * 0);//how long to wait before running task
+			// getHungerLevel() * 1000); change back to this in final version
+		stateChanged();
     }
     
 
     /** When the customer is done eating, he leaves the restaurant */
     private void leaveRestaurant() {
-	print("Leaving the restaurant");
-	guiCustomer.leave(); //for the animation
-	waiter.msgDoneEatingAndLeaving(this);
-	isHungry = false;
-	stateChanged();
-	gui.setCustomerEnabled(this); //Message to gui to enable hunger button
-
-	//hack to keep customer getting hungry. Only for non-gui customers
-	if (gui==null) becomeHungryInAWhile();//set a timer to make us hungry.
+		print("Leaving the restaurant");
+		guiCustomer.leave(); //for the animation
+		waiter.msgDoneEatingAndLeaving(this);
+		isHungry = false;
+		stateChanged();
+		gui.setCustomerEnabled(this); //Message to gui to enable hunger button
+	
+		//hack to keep customer getting hungry. Only for non-gui customers
+		if (gui==null) becomeHungryInAWhile();//set a timer to make us hungry.
     }
     
     /** This starts a timer so the customer will become hungry again.
      * This is a hack that is used when the GUI is not being used */
     private void becomeHungryInAWhile() {
-	timer.schedule(new TimerTask() {
-	    public void run() {  
-		setHungry();		    
-	    }},
-	    15000);//how long to wait before running task
-    }
-
-    // *** EXTRA ***
-
-    /** establish connection to host agent. 
-     * @param host reference to the host */
-    public void setHost(HostAgent host) {
-		this.host = host;
+		timer.schedule(new TimerTask() {
+		    public void run() {  
+			setHungry();		    
+		    }},
+		    15000);//how long to wait before running task
+	    }
+	
+	    // *** EXTRA ***
+	
+	    /** establish connection to host agent. 
+	     * @param host reference to the host */
+	    public void setHost(HostAgent host) {
+			this.host = host;
     }
     
     /** Returns the customer's name
      *@return name of customer */
     public String getName() {
-	return name;
+    	return name;
     }
 
     /** @return true if the customer is hungry, false otherwise.
      ** Customer is hungry from time he is created (or button is
      ** pushed, until he eats and leaves.*/
     public boolean isHungry() {
-	return isHungry;
+    	return isHungry;
     }
 
     /** @return the hungerlevel of the customer */
     public int getHungerLevel() {
-	return hungerLevel;
+    	return hungerLevel;
     }
     
     /** Sets the customer's hungerlevel to a new value
      * @param hungerLevel the new hungerlevel for the customer */
     public void setHungerLevel(int hungerLevel) {
-	this.hungerLevel = hungerLevel; 
-    }
-    public GuiCustomer getGuiCustomer(){
-	return guiCustomer;
+		this.hungerLevel = hungerLevel; 
+	}
+	
+    public GuiCustomer getGuiCustomer() {
+	    	return guiCustomer;
     }
     
     /** @return the string representation of the class */
     public String toString() {
-	return "customer " + getName();
+    	return "customer " + getName();
     }
-
-    
 }
 

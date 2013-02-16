@@ -15,72 +15,86 @@ import java.awt.Color;
  */
 public class CookAgent extends Agent {
 
-    //List of all the orders
+    // List of all the orders
     private List<Order> orders = new ArrayList<Order>();
     private Map<String,FoodData> inventory = new HashMap<String,FoodData>();
     public enum Status {pending, cooking, done}; // order status
 
-    //Name of the cook
+    // Name of the cook
     private String name;
 
-    //Timer for simulation
+    // Timer for simulation
     Timer timer = new Timer();
     Restaurant restaurant; //Gui layout
+    
+    // Constants
+    final private int MAX_ITEM_QUANTITY = 5;
+    final private int MIN_ITEM_QUANTITY = 2;
 
     /** Constructor for CookAgent class
      * @param name name of the cook
      */
     public CookAgent(String name, Restaurant restaurant) {
-	super();
-
-	this.name = name;
-	this.restaurant = restaurant;
-	//Create the restaurant's inventory.
-	inventory.put("Steak",new FoodData("Steak", 5));
-	inventory.put("Chicken",new FoodData("Chicken", 4));
-	inventory.put("Pizza",new FoodData("Pizza", 3));
-	inventory.put("Salad",new FoodData("Salad", 2));
+		super();
+	
+		this.name = name;
+		this.restaurant = restaurant;
+		// Create the restaurant's inventory.
+		Menu menu = new Menu();
+		for(int i = 0; i < menu.getLength(); i ++)
+		{
+			String itemName = menu.itemAtIndex(i).getName();
+			int itemQuantity = (int)(Math.random()*(MAX_ITEM_QUANTITY-MIN_ITEM_QUANTITY))+MIN_ITEM_QUANTITY;
+			inventory.put(itemName, new FoodData(itemName, itemQuantity));
+		}
+		/*
+		// old way of filling up inventory
+		inventory.put("Steak", new FoodData("Steak", 5));
+		inventory.put("Chicken", new FoodData("Chicken", 4));
+		inventory.put("Pizza", new FoodData("Pizza", 3));
+		inventory.put("Salad", new FoodData("Salad", 2));
+		*/
     }
     /** Private class to store information about food.
      *  Contains the food type, its cooking time, and ...
      */
     private class FoodData {
-	String type; //kind of food
-	double cookTime;
-	// other things ...
-	
-	public FoodData(String type, double cookTime){
-	    this.type = type;
-	    this.cookTime = cookTime;
-	}
+		String type; //kind of food
+		double cookTime;
+		// other things ...
+		
+		public FoodData(String type, double cookTime){
+		    this.type = type;
+		    this.cookTime = cookTime;
+		}
     }
     /** Private class to store order information.
      *  Contains the waiter, table number, food item,
      *  cooktime and status.
      */
     private class Order {
-	public WaiterAgent waiter;
-	public int tableNum;
-	public String choice;
-	public Status status;
-	public Food food; //a gui variable
-
-	/** Constructor for Order class 
-	 * @param waiter waiter that this order belongs to
-	 * @param tableNum identification number for the table
-	 * @param choice type of food to be cooked 
-	 */
-	public Order(WaiterAgent waiter, int tableNum, String choice){
-	    this.waiter = waiter;
-	    this.choice = choice;
-	    this.tableNum = tableNum;
-	    this.status = Status.pending;
-	}
-
-	/** Represents the object as a string */
-	public String toString(){
-	    return choice + " for " + waiter ;
-	}
+		public WaiterAgent waiter;
+		public int tableNum;
+		public MenuItem choice;
+		public Status status;
+		public Food food; //a gui variable
+	
+		/** Constructor for Order class 
+		 * @param waiter waiter that this order belongs to
+		 * @param tableNum identification number for the table
+		 * @param choice type of food to be cooked 
+		 */
+		public Order(WaiterAgent waiter, int tableNum, MenuItem choice) {
+		    this.waiter = waiter;
+		    this.choice = choice;
+		    this.tableNum = tableNum;
+		    this.status = Status.pending;
+		}
+	
+		/** Represents the object as a string */
+		public String toString() {
+		    return choice.getName() + " for " + waiter ;
+		}
     }
 
 
@@ -94,9 +108,9 @@ public class CookAgent extends Agent {
      * @param tableNum identification number for the table
      * @param choice type of food to be cooked
      */
-    public void msgHereIsAnOrder(WaiterAgent waiter, int tableNum, String choice){
-	orders.add(new Order(waiter, tableNum, choice));
-	stateChanged();
+    public void msgHereIsAnOrder(WaiterAgent waiter, int tableNum, MenuItem choice) {
+		orders.add(new Order(waiter, tableNum, choice));
+		stateChanged();
     }
 
 
@@ -130,41 +144,42 @@ public class CookAgent extends Agent {
     /** Starts a timer for the order that needs to be cooked. 
      * @param order
      */
-    private void cookOrder(Order order){
-	DoCooking(order);
-	order.status = Status.cooking;
+    private void cookOrder(Order order) {
+		DoCooking(order);
+		order.status = Status.cooking;
     }
 
-    private void placeOrder(Order order){
-	DoPlacement(order);
-	order.waiter.msgOrderIsReady(order.tableNum, order.food);
-	orders.remove(order);
+    private void placeOrder(Order order) {
+		DoPlacement(order);
+		order.waiter.msgOrderIsReady(order.tableNum, order.food);
+		orders.remove(order);
     }
 
 
     // *** EXTRA -- all the simulation routines***
 
     /** Returns the name of the cook */
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    private void DoCooking(final Order order){
-	print("Cooking: " + order + " for table:" + (order.tableNum+1));
-	//put it on the grill. gui stuff
-	order.food = new Food(order.choice.substring(0,2),new Color(0,255,255), restaurant);
-	order.food.cookFood();
-
-	timer.schedule(new TimerTask(){
-	    public void run(){//this routine is like a message reception    
-		order.status = Status.done;
-		stateChanged();
-	    }
-	}, (int)(inventory.get(order.choice).cookTime*1000));
+    private void DoCooking(final Order order) {
+		print("Cooking: " + order + " for table:" + (order.tableNum+1));
+		//put it on the grill. gui stuff
+		order.food = new Food(order.choice.getName().substring(0,2),new Color(0,255,255), restaurant);
+		order.food.cookFood();
+	
+		timer.schedule(new TimerTask() {
+		    public void run() {//this routine is like a message reception    
+				order.status = Status.done;
+				stateChanged();
+		    }
+		}, (int)(inventory.get(order.choice.getName()).cookTime*1000));
     }
-    public void DoPlacement(Order order){
-	print("Order finished: " + order + " for table:" + (order.tableNum+1));
-	order.food.placeOnCounter();
+    
+    public void DoPlacement(Order order) {
+		print("Order finished: " + order + " for table:" + (order.tableNum+1));
+		order.food.placeOnCounter();
     }
 }
 

@@ -31,7 +31,7 @@ public class WaiterAgent extends Agent {
     private class MyCustomer {
 	public CustomerState state;
 	public CustomerAgent cmr;
-	public String choice;
+	public MenuItem choice;
 	public int tableNum;
 	public Food food; //gui thing
 
@@ -128,7 +128,7 @@ public class WaiterAgent extends Agent {
     /** Customer sends this when they have decided what they want to eat 
      * @param customer customer who has decided their choice
      * @param choice the food item that the customer chose */
-    public void msgHereIsMyChoice(CustomerAgent customer, String choice){
+    public void msgHereIsMyChoice(CustomerAgent customer, MenuItem choice){
 	for(MyCustomer c:customers){
 	    if(c.cmr.equals(customer)){
 		c.choice = choice;
@@ -279,7 +279,7 @@ public class WaiterAgent extends Agent {
 	//order to give him an order. We assume some sort of electronic
 	//method implemented as our message to the cook. So there is no
 	//animation analog, and hence no DoXXX routine is needed.
-	print("Giving " + customer.cmr + "'s choice of " + customer.choice + " to cook");
+	print("Giving " + customer.cmr + "'s choice of " + customer.choice.getName() + " to cook");
 
 
 	customer.state = CustomerState.NO_ACTION;
@@ -289,10 +289,10 @@ public class WaiterAgent extends Agent {
 	//Here's a little animation hack. We put the first two
 	//character of the food name affixed with a ? on the table.
 	//Simply let's us see what was ordered.
-	tables[customer.tableNum].takeOrder(customer.choice.substring(0,2)+"?");
+	tables[customer.tableNum].takeOrder(customer.choice.getName().substring(0,2)+"?");
 	restaurant.placeFood(tables[customer.tableNum].foodX(),
 			     tables[customer.tableNum].foodY(),
-			     new Color(255, 255, 255), customer.choice.substring(0,2)+"?");
+			     new Color(255, 255, 255), customer.choice.getName().substring(0,2)+"?");
     }
 
     /** Gives food to the customer 
@@ -337,11 +337,10 @@ public class WaiterAgent extends Agent {
 						 tables[customer.tableNum].getY()+1);
 		guiWaiter.giveBill();
 		guiMoveFromCurrentPostionTo(tablePos);
-		
     }
     
     void DoGiveFoodToCustomer(MyCustomer customer) {
-		print("Giving finished order of " + customer.choice +" to " + customer.cmr);
+		print("Giving finished order of " + customer.choice.getName() +" to " + customer.cmr);
 		Position inFrontOfGrill = new Position(customer.food.getX()-1,customer.food.getY());
 		guiMoveFromCurrentPostionTo(inFrontOfGrill);//in front of grill
 		guiWaiter.pickUpFood(customer.food);
