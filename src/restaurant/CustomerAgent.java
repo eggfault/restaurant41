@@ -65,11 +65,11 @@ public class CustomerAgent extends Agent {
      * @param waiter the waiter that sent the message
      * @param menu a reference to a menu */
     public void msgFollowMeToTable(WaiterAgent waiter, Menu menu) {
-	this.menu = menu;
-	this.waiter = waiter;
-	print("Received msgFollowMeToTable from" + waiter);
-	events.add(AgentEvent.beingSeated);
-	stateChanged();
+		this.menu = menu;
+		this.waiter = waiter;
+		print("Received msgFollowMeToTable from" + waiter);
+		events.add(AgentEvent.beingSeated);
+		stateChanged();
     }
     /** Waiter sends this message to take the customer's order */
     public void msgDecided(){
@@ -114,10 +114,10 @@ public class CustomerAgent extends Agent {
 	    // elseif (event == xxx) {}
 	}
 	if (state == AgentState.WaitingInRestaurant) {
-	    if (event == AgentEvent.beingSeated)	{
-		makeMenuChoice();
-		state = AgentState.SeatedWithMenu;
-		return true;
+	    if (event == AgentEvent.beingSeated) {
+			makeMenuChoice();
+			state = AgentState.SeatedWithMenu;
+			return true;
 	    }
 	}
 	if (state == AgentState.SeatedWithMenu) {
@@ -151,7 +151,8 @@ public class CustomerAgent extends Agent {
 	}
 	if (state == AgentState.WaiterImReadyToPay) {
 	    if (event == AgentEvent.waiterToGiveBill) {
-		leaveRestaurant();
+		//leaveRestaurant();
+	    
 	    state = AgentState.DoingNothing;
 		return true;
 	    }
@@ -165,43 +166,43 @@ public class CustomerAgent extends Agent {
     
     /** Goes to the restaurant when the customer becomes hungry */
     private void goingToRestaurant() {
-	print("Going to restaurant");
-	guiCustomer.appearInWaitingQueue();
-	host.msgIWantToEat(this);//send him our instance, so he can respond to us
-	stateChanged();
+		print("Going to restaurant");
+		guiCustomer.appearInWaitingQueue();
+		host.msgIWantToEat(this);//send him our instance, so he can respond to us
+		stateChanged();
     }
     
     /** Starts a timer to simulate the customer thinking about the menu */
-    private void makeMenuChoice(){
-	print("Deciding menu choice...(3000 milliseconds)");
-	timer.schedule(new TimerTask() {
-	    public void run() {  
-		msgDecided();	    
-	    }},
-	    3000);//how long to wait before running task
-	stateChanged();
+    private void makeMenuChoice() {
+		print("Deciding menu choice...(3000 milliseconds)");
+		timer.schedule(new TimerTask() {
+		    public void run() {  
+			msgDecided();	    
+		    }},
+		    3000);//how long to wait before running task
+		stateChanged();
     }
     
     /** Tells waiter the customer is ready to order food. */
-    private void readyToOrder(){
-	print("I decided!");
-	waiter.msgImReadyToOrder(this);
-	stateChanged();
+    private void readyToOrder() {
+		print("I decided!");
+		waiter.msgImReadyToOrder(this);
+		stateChanged();
     }
     
     /** Tells waiter the customer is ready to pay for the food (finished eating) */
-    private void readyToPay(){
-	print("I am ready to pay.");
-	waiter.msgImReadyToPay(this);
-	stateChanged();
+    private void readyToPay() {
+		print("I am ready to pay.");
+		waiter.msgImReadyToPay(this);
+		stateChanged();
     }
     
     /** Picks a random choice from the menu and sends it to the waiter */
-    private void orderFood(){
-	String choice = menu.choices[(int)(Math.random()*4)];
-	print("Ordering the " + choice);
-	waiter.msgHereIsMyChoice(this, choice);
-	stateChanged();
+    private void orderFood() {
+		String choice = menu.choices[(int)(Math.random()*4)];
+		print("Ordering the " + choice);
+		waiter.msgHereIsMyChoice(this, choice);
+		stateChanged();
     }
 
     /** Starts a timer to simulate eating */

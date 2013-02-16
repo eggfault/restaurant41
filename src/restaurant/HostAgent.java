@@ -124,13 +124,13 @@ public class HostAgent extends Agent {
      * @param waiter
      * @param customer
      * @param tableNum */
-    private void tellWaiterToSitCustomerAtTable(MyWaiter waiter, CustomerAgent customer, int tableNum){
-	print("Telling " + waiter.wtr + " to sit " + customer +" at table "+(tableNum+1));
-	waiter.wtr.msgSitCustomerAtTable(customer, tableNum);
-	tables[tableNum].occupied = true;
-	waitList.remove(customer);
-	nextWaiter = (nextWaiter+1)%waiters.size();
-	stateChanged();
+    private void tellWaiterToSitCustomerAtTable(MyWaiter waiter, CustomerAgent customer, int tableNum) {
+		print("Telling " + waiter.wtr + " to sit " + customer + " at table " +(tableNum+1));
+		waiter.wtr.msgSitCustomerAtTable(customer, tableNum);
+		tables[tableNum].occupied = true;
+		waitList.remove(customer);
+		nextWaiter = (nextWaiter+1)%waiters.size();
+		stateChanged();
     }
 	
     
@@ -139,16 +139,16 @@ public class HostAgent extends Agent {
 
     /** Returns the name of the host 
      * @return name of host */
-    public String getName(){
+    public String getName() {
         return name;
     }    
 
     /** Hack to enable the host to know of all possible waiters 
      * @param waiter new waiter to be added to list
      */
-    public void setWaiter(WaiterAgent waiter){
-	waiters.add(new MyWaiter(waiter));
-	stateChanged();
+    public void setWaiter(WaiterAgent waiter) {
+		waiters.add(new MyWaiter(waiter));
+		stateChanged();
     }
     
     //Gautam Nayak - Gui calls this when table is created in animation

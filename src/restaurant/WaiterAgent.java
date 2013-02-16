@@ -87,11 +87,11 @@ public class WaiterAgent extends Agent {
     /** Host sends this to give the waiter a new customer.
      * @param customer customer who needs seated.
      * @param tableNum identification number for table */
-    public void msgSitCustomerAtTable(CustomerAgent customer, int tableNum){
-	MyCustomer c = new MyCustomer(customer, tableNum);
-	c.state = CustomerState.NEED_SEATED;
-	customers.add(c);
-	stateChanged();
+    public void msgSitCustomerAtTable(CustomerAgent customer, int tableNum) {
+		MyCustomer c = new MyCustomer(customer, tableNum);
+		c.state = CustomerState.NEED_SEATED;
+		customers.add(c);
+		stateChanged();
     }
 
     /** Customer sends this when they are ready to order.
