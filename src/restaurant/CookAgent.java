@@ -28,8 +28,8 @@ public class CookAgent extends Agent {
     Restaurant restaurant; //Gui layout
     
     // Constants
-    final private int MAX_ITEM_QUANTITY = 5;
     final private int MIN_ITEM_QUANTITY = 2;
+    final private int MAX_ITEM_QUANTITY = 5;
 
     /** Constructor for CookAgent class
      * @param name name of the cook
@@ -113,17 +113,17 @@ public class CookAgent extends Agent {
     /** Scheduler.  Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
 		//If there exists an order o whose status is done, place o.
-		for(Order o:orders){
-		    if(o.status == Status.done){
-			placeOrder(o);
-			return true;
+		for(Order o:orders) {
+		    if(o.status == Status.done) {
+				placeOrder(o);
+				return true;
 		    }
 		}
 		//If there exists an order o whose status is pending, cook o.
-		for(Order o:orders){
-		    if(o.status == Status.pending){
-			cookOrder(o);
-			return true;
+		for(Order o:orders) {
+		    if(o.status == Status.pending) {
+				cookOrder(o);
+				return true;
 		    }
 		}
 	

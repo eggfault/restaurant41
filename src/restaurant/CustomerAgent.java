@@ -13,7 +13,14 @@ import java.awt.Color;
  * Interacts with a waiter only */
 public class CustomerAgent extends Agent {
     private String name;
-    private int hungerLevel = 5;  // Determines length of meal
+    private int hungerLevel = 5;  	// Determines length of meal
+    private Menu menu;
+    private MenuItem choice;		// what food the customer decides to order (this is also used to calculate the bill)
+    private double bill;			// maybe make a Bill class eventually to track multiple orders and calculate tip, etc.
+    private double money;			// how much money the customer has (this is randomized upon initialization)
+    private final double MIN_MONEY = 7.50;
+    private final double MAX_MONEY = 26.00;
+    
     private RestaurantGui gui;
     
     // ** Agent connections **
@@ -21,21 +28,19 @@ public class CustomerAgent extends Agent {
     private WaiterAgent waiter;
     private CashierAgent cashier;
     Restaurant restaurant;
-    private Menu menu;
-    private MenuItem choice;	// what food the customer decides to order (this is also used to calculate the bill)
-    private double bill;			// maybe make a Bill class eventually to track multiple orders and calculate tip, etc.
+    
     Timer timer = new Timer();
     GuiCustomer guiCustomer; //for gui
    // ** Agent state **
     private boolean isHungry = false; //hack for gui
     public enum AgentState
 	    {DoingNothing, WaitingInRestaurant, SeatedWithMenu, WaiterImReadyToOrder, WaitingForFood, Eating,
-    	WaiterImReadyToPay};
+    	WaiterImReadyToPay, PayingForFood};
 	//{NO_ACTION,NEED_SEATED,NEED_DECIDE,NEED_ORDER,NEED_EAT,NEED_LEAVE};
     private AgentState state = AgentState.DoingNothing;//The start state
     public enum AgentEvent 
 	    {gotHungry, beingSeated, decidedChoice, waiterToTakeOrder, foodDelivered, doneEating,
-    	waiterToGiveBill};
+    	waiterToGiveBill, donePaying};
     List<AgentEvent> events = new ArrayList<AgentEvent>();
     
     /** Constructor for CustomerAgent class 
@@ -47,6 +52,8 @@ public class CustomerAgent extends Agent {
 		this.gui = gui;
 		this.name = name;
 		this.restaurant = restaurant;
+		this.money = (double)Math.round((Math.random()*(MAX_MONEY-MIN_MONEY) + MIN_MONEY) * 100) / 100;	// gives the customer a random amount of money 
+																										// between the min/max bounds for money and rounds it to .00
 		guiCustomer = new GuiCustomer(name.substring(0,2), new Color(0,255,0), restaurant);
     }
     
@@ -55,6 +62,8 @@ public class CustomerAgent extends Agent {
 		this.gui = null;
 		this.name = name;
 		this.restaurant = restaurant;
+		this.money = (double)Math.round((Math.random()*(MAX_MONEY-MIN_MONEY) + MIN_MONEY) * 100) / 100;	// gives the customer a random amount of money 
+																										// between the min/max bounds for money and rounds it to .00
 		guiCustomer = new GuiCustomer(name.substring(0,1), new Color(0,255,0), restaurant);
     }
     
@@ -102,6 +111,13 @@ public class CustomerAgent extends Agent {
 		events.add(AgentEvent.doneEating);
 		stateChanged(); 
     }
+    /** Cashier sends this to give change back to the customer after he has paid for food */
+    public void msgHeresYourChange(double change) {
+    	money += change;
+    	print("Received $" + change + " in change. Now I have $" + money);
+    	events.add(AgentEvent.donePaying);
+    	stateChanged();
+    }
 
     // *** SCHEDULER ***
     /** Scheduler.  Determine what action is called for, and do it. */
@@ -148,7 +164,6 @@ public class CustomerAgent extends Agent {
 	}
 	if (state == AgentState.Eating) {
 	    if (event == AgentEvent.doneEating)	{
-		//leaveRestaurant(); don't leave restaurant yet!
 	    readyToPay();
 	    state = AgentState.WaiterImReadyToPay;
 		return true;
@@ -157,6 +172,13 @@ public class CustomerAgent extends Agent {
 	if (state == AgentState.WaiterImReadyToPay) {
 	    if (event == AgentEvent.waiterToGiveBill) {
 	    payCashierForFood();
+	    state = AgentState.PayingForFood;
+		return true;
+	    }
+	}
+	if (state == AgentState.PayingForFood) {
+	    if (event == AgentEvent.donePaying) {
+	    leaveRestaurant();
 	    state = AgentState.DoingNothing;
 		return true;
 	    }
@@ -225,14 +247,19 @@ public class CustomerAgent extends Agent {
     private void payCashierForFood() {
     	// Semi-hack to calculate cost of food
     	bill = choice.getPrice();				// this is for ONE order only, code must be changed if accomodating multiple orders
-    	// if(customer has enough money) {
+    	if(money >= bill) {
 	    	double payment = ((int)bill / 5 + 1) * 5;		// truncates bill to nearest int, uses integer division to divide by 5, adds 1, multiplies by 5
 	    													// this effectively makes the customer pay for the food in bills of 5
+	    	print("I have $" + money);
 	    	print("Paying the cashier $" + payment + " for a bill costing $" + bill);
+	    	money -= payment;
+	    	print("Now I have $" + money + " left.");
 	    	cashier.msgPayForFood(this, bill, payment);
-    	//}
-		//else {
-	    //}
+    	}
+		else {
+			print("Not enough money!");
+			cashier.msgPayForFood(this, bill, 100);			// temporary code to keep the program running
+	    }
 		stateChanged();
     }
 

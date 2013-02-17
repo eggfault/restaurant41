@@ -99,6 +99,7 @@ public class RestaurantPanel extends JPanel {
 
 	host.startThread();
 	cook.startThread();
+	cashier.startThread();
 
 	setLayout(new GridLayout(1,2, 20,20));
 	group.setLayout(new GridLayout(1,2, 10,10));
@@ -113,17 +114,17 @@ public class RestaurantPanel extends JPanel {
 
     /** Sets up the restaurant label that includes the menu, 
      * and host and cook information */
-    private void initRestLabel(){
-	JLabel label = new JLabel();
-	//restLabel.setLayout(new BoxLayout((Container)restLabel, BoxLayout.Y_AXIS));
-	restLabel.setLayout(new BorderLayout());
-	label.setText(
-	 "<html><h3><u>Tonight's Staff</u></h3><table><tr><td>Host:</td><td>"+host.getName()+"</td></tr><tr><td width=50>Cook:</td><td>"+cook.getName()+"</td></tr></table><h3><u> Menu</u></h3><table><tr><td>Steak</td><td>$15.99</td></tr><tr><td>Chicken</td><td>$10.99</td></tr><tr><td>Salad</td><td>$5.99</td></tr><tr><td>Pizza</td><td>$8.99</td></tr></table><br>></html>");
-
-	restLabel.setBorder(BorderFactory.createRaisedBevelBorder());
-	restLabel.add(label, BorderLayout.CENTER);
-	restLabel.add(new JLabel("               "), BorderLayout.EAST );
-	restLabel.add(new JLabel("               "), BorderLayout.WEST );
+    private void initRestLabel() {
+		JLabel label = new JLabel();
+		//restLabel.setLayout(new BoxLayout((Container)restLabel, BoxLayout.Y_AXIS));
+		restLabel.setLayout(new BorderLayout());
+		label.setText(
+		 "<html><h3><u>Tonight's Staff</u></h3><table><tr><td>Host:</td><td>"+host.getName()+"</td></tr><tr><td width=50>Cook:</td><td>"+cook.getName()+"</td></tr></table><h3><u> Menu</u></h3><table><tr><td>Steak</td><td>$15.99</td></tr><tr><td>Chicken</td><td>$10.99</td></tr><tr><td>Salad</td><td>$5.99</td></tr><tr><td>Pizza</td><td>$8.99</td></tr></table><br>></html>");
+	
+		restLabel.setBorder(BorderFactory.createRaisedBevelBorder());
+		restLabel.add(label, BorderLayout.CENTER);
+		restLabel.add(new JLabel("               "), BorderLayout.EAST );
+		restLabel.add(new JLabel("               "), BorderLayout.WEST );
     }
 
     /** When a customer or waiter is clicked, this function calls
