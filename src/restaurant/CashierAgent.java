@@ -47,7 +47,8 @@ public class CashierAgent extends Agent {
 				return;
 		    }
 		}*/
-    	System.out.println("Customer paid cashier. Change is: $" + (payment-bill));
+    	double change = (double)Math.round((payment - bill) * 100) / 100;		// rounds the change to decimal places
+    	System.out.println(this.name + ": " + customer.getName() + " paid cashier. Change due is $" + change);
     }
     
     // *** SCHEDULER ***
