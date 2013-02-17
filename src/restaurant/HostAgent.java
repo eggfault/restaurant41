@@ -99,12 +99,24 @@ public class HostAgent extends Agent {
     
     /** Customer decides to wait to be seated */
 	public void msgIWillWait(CustomerAgent customer) {
-		
+		// Do nothing for now
+		// Customer will simply remain in the waitList
+		print("Ok, thank you for deciding to wait. We will serve you momentarily.");
 	}
 	
 	/** Customer will not wait to be seated; customer will leave */
 	public void msgIWillNotWait(CustomerAgent customer) {
-		waitList.remove(new MyCustomer(customer));
+		// Find customer and remove him from the waitlist
+		MyCustomer tc = new MyCustomer(customer);
+		for(MyCustomer c:waitList)
+		{
+			synchronized(waitList) {
+				if(c.cmr.equals(customer))
+					tc = c;
+			}
+		}
+		waitList.remove(tc);
+		// Some parting words </3
 		print("Well, screw you too. Goodbye.");
 	}
     
