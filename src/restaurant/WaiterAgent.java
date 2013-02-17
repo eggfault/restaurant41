@@ -29,20 +29,20 @@ public class WaiterAgent extends Agent {
      * Contains a reference to the customer, his choice, 
      * table number, and state */
     private class MyCustomer {
-	public CustomerState state;
-	public CustomerAgent cmr;
-	public MenuItem choice;
-	public int tableNum;
-	public Food food; //gui thing
-
-	/** Constructor for MyCustomer class.
-	 * @param cmr reference to customer
-	 * @param num assigned table number */
-	public MyCustomer(CustomerAgent cmr, int num){
-	    this.cmr = cmr;
-	    tableNum = num;
-	    state = CustomerState.NO_ACTION;
-	}
+		public CustomerState state;
+		public CustomerAgent cmr;
+		public MenuItem choice;
+		public int tableNum;
+		public Food food; //gui thing
+	
+		/** Constructor for MyCustomer class.
+		 * @param cmr reference to customer
+		 * @param num assigned table number */
+		public MyCustomer(CustomerAgent cmr, int num) {
+		    this.cmr = cmr;
+		    tableNum = num;
+		    state = CustomerState.NO_ACTION;
+		}
     }
 
     //Name of waiter
@@ -68,18 +68,18 @@ public class WaiterAgent extends Agent {
      * @param gui reference to the gui */
     public WaiterAgent(String name, AStarTraversal aStar,
 		       Restaurant restaurant, Table[] tables) {
-	super();
-
-	this.name = name;
-
-	//initialize all the animation objects
-	this.aStar = aStar;
-	this.restaurant = restaurant;//the layout for astar
-	guiWaiter = new GuiWaiter(name.substring(0,2), new Color(255, 0, 0), restaurant);
-	currentPosition = new Position(guiWaiter.getX(), guiWaiter.getY());
-        currentPosition.moveInto(aStar.getGrid());
-	originalPosition = currentPosition;//save this for moving into
-	this.tables = tables;
+		super();
+	
+		this.name = name;
+	
+		//initialize all the animation objects
+		this.aStar = aStar;
+		this.restaurant = restaurant;//the layout for astar
+		guiWaiter = new GuiWaiter(name.substring(0,2), new Color(255, 0, 0), restaurant);
+		currentPosition = new Position(guiWaiter.getX(), guiWaiter.getY());
+	        currentPosition.moveInto(aStar.getGrid());
+		originalPosition = currentPosition;//save this for moving into
+		this.tables = tables;
     } 
 
     // *** MESSAGES ***
@@ -113,134 +113,134 @@ public class WaiterAgent extends Agent {
     /** Customer sends this when they are ready to pay.
      * @param customer customer who is ready to order.
      */
-    public void msgImReadyToPay(CustomerAgent customer){
-	for(int i=0; i < customers.size(); i++){
-	    //if(customers.get(i).cmr.equals(customer)){
-	    if (customers.get(i).cmr == customer){
-		customers.get(i).state = CustomerState.READY_TO_PAY;
-		stateChanged();
-		return;
-	    }
-	}
-	System.out.println("msgImReadyToPay in WaiterAgent, didn't find him?");
+    public void msgImReadyToPay(CustomerAgent customer) {
+		for(int i=0; i < customers.size(); i++) {
+			    //if(customers.get(i).cmr.equals(customer)) {
+			    if (customers.get(i).cmr == customer) {
+				customers.get(i).state = CustomerState.READY_TO_PAY;
+				stateChanged();
+				return;
+		    }
+		}
+		System.out.println("msgImReadyToPay in WaiterAgent, didn't find him?");
     }
 
     /** Customer sends this when they have decided what they want to eat 
      * @param customer customer who has decided their choice
      * @param choice the food item that the customer chose */
-    public void msgHereIsMyChoice(CustomerAgent customer, MenuItem choice){
-	for(MyCustomer c:customers){
-	    if(c.cmr.equals(customer)){
-		c.choice = choice;
-		c.state = CustomerState.ORDER_PENDING;
-		stateChanged();
-		return;
-	    }
-	}
+    public void msgHereIsMyChoice(CustomerAgent customer, MenuItem choice) {
+		for(MyCustomer c:customers) {
+		    if(c.cmr.equals(customer)) {
+				c.choice = choice;
+				c.state = CustomerState.ORDER_PENDING;
+				stateChanged();
+				return;
+		    }
+		}
     }
 
     /** Cook sends this when the order is ready.
      * @param tableNum identification number of table whose food is ready
      * @param f is the guiFood object */
-    public void msgOrderIsReady(int tableNum, Food f){
-	for(MyCustomer c:customers){
-	    if(c.tableNum == tableNum){
-		c.state = CustomerState.ORDER_READY;
-		c.food = f; //so that later we can remove it from the table.
-		stateChanged();
-		return;
-	    }
-	}
+    public void msgOrderIsReady(int tableNum, Food f) {
+		for(MyCustomer c:customers) {
+		    if(c.tableNum == tableNum) {
+				c.state = CustomerState.ORDER_READY;
+				c.food = f; //so that later we can remove it from the table.
+				stateChanged();
+				return;
+		    }
+		}
     }
 
     /** Customer sends this when they are done eating.
      * @param customer customer who is leaving the restaurant. */
-    public void msgDoneEatingAndLeaving(CustomerAgent customer){
-	for(MyCustomer c:customers){
-	    if(c.cmr.equals(customer)){
-		c.state = CustomerState.IS_DONE;
-		stateChanged();
-		return;
-	    }
-	}
+    public void msgDoneEatingAndLeaving(CustomerAgent customer) {
+		for(MyCustomer c:customers) {
+		    if(c.cmr.equals(customer)) {
+				c.state = CustomerState.IS_DONE;
+				stateChanged();
+				return;
+		    }
+		}
     }
 
     /** Sent from GUI to control breaks 
      * @param state true when the waiter should go on break and 
      *              false when the waiter should go off break
      *              Is the name onBreak right? What should it be?*/
-    public void setBreakStatus(boolean state){
-	onBreak = state;
-	stateChanged();
+    public void setBreakStatus(boolean state) {
+		onBreak = state;
+		stateChanged();
     }
 
 
 
     /** Scheduler.  Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
-	//print("in waiter scheduler");
-
-	// Runs through the customers for each rule, so 
-	// the waiter doesn't serve only one customer at a time
-	if(!customers.isEmpty()){
-	    // System.out.println("in scheduler, customers not empty:");
-	    // Gives food to customer if the order is ready
-	    for(MyCustomer c:customers) {
-			if(c.state == CustomerState.ORDER_READY) {
-			    giveFoodToCustomer(c);
-			    return true;
-			}
-	    }
-	    // Clears the table if the customer has left
-	    for(MyCustomer c:customers) {
-			if(c.state == CustomerState.IS_DONE) {
-			    clearTable(c);
-			    return true;
-			}
-	    }
-
-	    // Seats the customer if they need it
-	    for(MyCustomer c:customers) {
-			if(c.state == CustomerState.NEED_SEATED){
-			    seatCustomer(c);
-			    return true;
-			}
-	    }
-
-	    // Gives all pending orders to the cook
-	    for(MyCustomer c:customers) {
-			if(c.state == CustomerState.ORDER_PENDING) {
-			    giveOrderToCook(c);
-			    return true;
-			}
-	    }
-
-	    // Takes new orders for customers that are ready to order
-	    for(MyCustomer c:customers) {
-			//print("testing for ready to order"+c.state);
-			if(c.state == CustomerState.READY_TO_ORDER) {
-			    takeOrder(c);
-			    return true;
-			}
-	    }
-	    
-	  // Gives customers their bills when they are finished eating
-	    for(MyCustomer c:customers) {
-			if(c.state == CustomerState.READY_TO_PAY) {
-			    giveBill(c);
-			    return true;
-			}
-	    }	
-	}
-	if (!currentPosition.equals(originalPosition)) {
-	    DoMoveToOriginalPosition();//Animation thing
-	    return true;
-	}
-
-	//we have tried all our rules and found nothing to do. 
-	// So return false to main loop of abstract agent and wait.
-	//print("in scheduler, no rules matched:");
-	return false;
+		//print("in waiter scheduler");
+	
+		// Runs through the customers for each rule, so 
+		// the waiter doesn't serve only one customer at a time
+		if(!customers.isEmpty()) {
+		    // System.out.println("in scheduler, customers not empty:");
+		    // Gives food to customer if the order is ready
+		    for(MyCustomer c:customers) {
+				if(c.state == CustomerState.ORDER_READY) {
+				    giveFoodToCustomer(c);
+				    return true;
+				}
+		    }
+		    // Clears the table if the customer has left
+		    for(MyCustomer c:customers) {
+				if(c.state == CustomerState.IS_DONE) {
+				    clearTable(c);
+				    return true;
+				}
+		    }
+	
+		    // Seats the customer if they need it
+		    for(MyCustomer c:customers) {
+				if(c.state == CustomerState.NEED_SEATED){
+				    seatCustomer(c);
+				    return true;
+				}
+		    }
+	
+		    // Gives all pending orders to the cook
+		    for(MyCustomer c:customers) {
+				if(c.state == CustomerState.ORDER_PENDING) {
+				    giveOrderToCook(c);
+				    return true;
+				}
+		    }
+	
+		    // Takes new orders for customers that are ready to order
+		    for(MyCustomer c:customers) {
+				//print("testing for ready to order"+c.state);
+				if(c.state == CustomerState.READY_TO_ORDER) {
+				    takeOrder(c);
+				    return true;
+				}
+		    }
+		    
+		  // Gives customers their bills when they are finished eating
+		    for(MyCustomer c:customers) {
+				if(c.state == CustomerState.READY_TO_PAY) {
+				    giveBill(c);
+				    return true;
+				}
+		    }	
+		}
+		if (!currentPosition.equals(originalPosition)) {
+		    DoMoveToOriginalPosition();//Animation thing
+		    return true;
+		}
+	
+		//we have tried all our rules and found nothing to do. 
+		// So return false to main loop of abstract agent and wait.
+		//print("in scheduler, no rules matched:");
+		return false;
     }
 
     // *** ACTIONS ***

@@ -97,10 +97,6 @@ public class CookAgent extends Agent {
 		}
     }
 
-
-    
-
-
     // *** MESSAGES ***
 
     /** Message from a waiter giving the cook a new order.
@@ -116,26 +112,25 @@ public class CookAgent extends Agent {
 
     /** Scheduler.  Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
+		//If there exists an order o whose status is done, place o.
+		for(Order o:orders){
+		    if(o.status == Status.done){
+			placeOrder(o);
+			return true;
+		    }
+		}
+		//If there exists an order o whose status is pending, cook o.
+		for(Order o:orders){
+		    if(o.status == Status.pending){
+			cookOrder(o);
+			return true;
+		    }
+		}
 	
-	//If there exists an order o whose status is done, place o.
-	for(Order o:orders){
-	    if(o.status == Status.done){
-		placeOrder(o);
-		return true;
-	    }
-	}
-	//If there exists an order o whose status is pending, cook o.
-	for(Order o:orders){
-	    if(o.status == Status.pending){
-		cookOrder(o);
-		return true;
-	    }
-	}
-
-	//we have tried all our rules (in this case only one) and found
-	//nothing to do. So return false to main loop of abstract agent
-	//and wait.
-	return false;
+		//we have tried all our rules (in this case only one) and found
+		//nothing to do. So return false to main loop of abstract agent
+		//and wait.
+		return false;
     }
     
 

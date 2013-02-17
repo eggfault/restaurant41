@@ -1,8 +1,6 @@
 package restaurant;
 
 import agent.Agent;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.*;
 import restaurant.layoutGUI.*;
 import java.awt.Color;
@@ -38,7 +36,19 @@ public class CashierAgent extends Agent {
 
     // *** MESSAGES ***
 
-    
+    /** Customer sends this when he is ready to pay.
+     * @param customer customer who is paying the cashier. */
+    public void msgPayForFood(CustomerAgent customer) {
+    	/*
+		for(MyCustomer c:customers) {
+		    if(c.cmr.equals(customer)) {
+				c.state = CustomerState.IS_DONE;
+				stateChanged();
+				return;
+		    }
+		}*/
+    	System.out.println("Customer paid cashier");
+    }
     
     // *** SCHEDULER ***
     protected boolean pickAndExecuteAnAction() {

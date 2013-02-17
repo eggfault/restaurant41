@@ -19,8 +19,11 @@ public class CustomerAgent extends Agent {
     // ** Agent connections **
     private HostAgent host;
     private WaiterAgent waiter;
+    private CashierAgent cashier;
     Restaurant restaurant;
     private Menu menu;
+    private MenuItem choice;	// what food the customer decides to order (this is also used to calculate the bill)
+    private double bill;			// maybe make a Bill class eventually to track multiple orders and calculate tip, etc.
     Timer timer = new Timer();
     GuiCustomer guiCustomer; //for gui
    // ** Agent state **
@@ -46,6 +49,7 @@ public class CustomerAgent extends Agent {
 		this.restaurant = restaurant;
 		guiCustomer = new GuiCustomer(name.substring(0,2), new Color(0,255,0), restaurant);
     }
+    
     public CustomerAgent(String name, Restaurant restaurant) {
 		super();
 		this.gui = null;
@@ -53,6 +57,7 @@ public class CustomerAgent extends Agent {
 		this.restaurant = restaurant;
 		guiCustomer = new GuiCustomer(name.substring(0,1), new Color(0,255,0), restaurant);
     }
+    
     // *** MESSAGES ***
     /** Sent from GUI to set the customer as hungry */
     public void setHungry() {
@@ -151,9 +156,7 @@ public class CustomerAgent extends Agent {
 	}
 	if (state == AgentState.WaiterImReadyToPay) {
 	    if (event == AgentEvent.waiterToGiveBill) {
-		//leaveRestaurant();
-	    // Hack to get bill
-	    System.out.println("End of sim");
+	    payCashierForFood();
 	    state = AgentState.DoingNothing;
 		return true;
 	    }
@@ -200,7 +203,7 @@ public class CustomerAgent extends Agent {
     
     /** Picks a random choice from the menu and sends it to the waiter */
     private void orderFood() {
-		MenuItem choice = menu.getRandomItem();
+		choice = menu.getRandomItem();
 		print("Ordering the " + choice.getName());
 		waiter.msgHereIsMyChoice(this, choice);
 		stateChanged();
@@ -218,8 +221,16 @@ public class CustomerAgent extends Agent {
 		stateChanged();
     }
     
+    /** When the customer is done eating, he calculates the bill and attempts to pay the cashier */
+    private void payCashierForFood() {
+    	// Semi-hack to calculate cost of food
+    	bill = choice.getPrice();				// this is for ONE order only, code must be changed if accomodating multiple orders
+    	print("Paying the cashier $" + bill);
+		cashier.msgPayForFood(this);
+		stateChanged();
+    }
 
-    /** When the customer is done eating, he leaves the restaurant */
+    /** When the customer is done paying for food, he leaves the restaurant */
     private void leaveRestaurant() {
 		print("Leaving the restaurant");
 		guiCustomer.leave(); //for the animation
@@ -241,14 +252,18 @@ public class CustomerAgent extends Agent {
 		    }},
 		    15000);//how long to wait before running task
 	    }
+
+    // *** EXTRA ***
 	
-	    // *** EXTRA ***
-	
-	    /** establish connection to host agent. 
-	     * @param host reference to the host */
-	    public void setHost(HostAgent host) {
-			this.host = host;
+    /** establish connection to host agent. 
+     * @param host reference to the host */
+    public void setHost(HostAgent host) {
+		this.host = host;
     }
+    
+	public void setCashier(CashierAgent cashier) {
+		this.cashier = cashier;
+	}
     
     /** Returns the customer's name
      *@return name of customer */

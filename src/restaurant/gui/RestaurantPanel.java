@@ -156,6 +156,7 @@ public class RestaurantPanel extends JPanel {
 		if(type.equals("Customers")) {
 		    CustomerAgent c = new CustomerAgent(name, gui, restaurant);
 		    c.setHost(host);
+		    c.setCashier(cashier);
 		    customers.add(c);
 		    c.startThread(); //Customer is fsm.
 		    c.setHungry();
