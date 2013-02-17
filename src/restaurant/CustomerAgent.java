@@ -13,6 +13,7 @@ import java.awt.Color;
  * Interacts with a waiter only */
 public class CustomerAgent extends Agent {
     private String name;
+    private int UID;				// Unique ID; this is currently unused (16 Feb 2013, 7:06 PM).
     private int hungerLevel = 5;  	// Determines length of meal
     private Menu menu;
     private MenuItem choice;		// what food the customer decides to order (this is also used to calculate the bill)
@@ -40,7 +41,7 @@ public class CustomerAgent extends Agent {
     private AgentState state = AgentState.DoingNothing;//The start state
     public enum AgentEvent 
 	    {gotHungry, beingSeated, decidedChoice, waiterToTakeOrder, foodDelivered, doneEating,
-    	waiterToGiveBill, donePaying};
+    	waiterToGiveBill, donePaying, decidingAboutWaiting};
     List<AgentEvent> events = new ArrayList<AgentEvent>();
     
     /** Constructor for CustomerAgent class 
@@ -96,7 +97,7 @@ public class CustomerAgent extends Agent {
 		stateChanged(); 
     }
     /** Waiter sends this message to give the customer his or her bill */
-    public void msgHeresYourBill() {
+    public void msgHereIsYourBill() {
 		events.add(AgentEvent.waiterToGiveBill);
 		stateChanged(); 
     }
@@ -112,90 +113,115 @@ public class CustomerAgent extends Agent {
 		stateChanged(); 
     }
     /** Cashier sends this to give change back to the customer after he has paid for food */
-    public void msgHeresYourChange(double change) {
+    public void msgHereIsYourChange(double change) {
     	money += change;
     	print("Received $" + change + " in change. Now I have $" + money);
     	events.add(AgentEvent.donePaying);
+    	stateChanged();
+    }
+    
+    /** Host sends this to ask the customer if he would like to wait to be seated */
+    public void msgWouldYouLikeToWait() {
+    	events.add(AgentEvent.decidingAboutWaiting);
     	stateChanged();
     }
 
     // *** SCHEDULER ***
     /** Scheduler.  Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
-	if (events.isEmpty()) return false;
-	AgentEvent event = events.remove(0); //pop first element
-	
-	//Simple finite state machine
-	if (state == AgentState.DoingNothing){
-	    if (event == AgentEvent.gotHungry)	{
-		goingToRestaurant();
-		state = AgentState.WaitingInRestaurant;
-		return true;
-	    }
-	    // elseif (event == xxx) {}
-	}
-	if (state == AgentState.WaitingInRestaurant) {
-	    if (event == AgentEvent.beingSeated) {
-			makeMenuChoice();
-			state = AgentState.SeatedWithMenu;
+		if (events.isEmpty()) return false;
+		AgentEvent event = events.remove(0); //pop first element
+		
+		//Simple finite state machine
+		if (state == AgentState.DoingNothing) {
+		    if (event == AgentEvent.gotHungry)	{
+			goingToRestaurant();
+			state = AgentState.WaitingInRestaurant;
 			return true;
-	    }
-	}
-	if (state == AgentState.SeatedWithMenu) {
-	    if (event == AgentEvent.decidedChoice)	{
-		readyToOrder();
-		state = AgentState.WaiterImReadyToOrder;
-		return true;
-	    }
-	}
-	if (state == AgentState.WaiterImReadyToOrder) {
-	    if (event == AgentEvent.waiterToTakeOrder)	{
-		orderFood();
-		state = AgentState.WaitingForFood;
-		return true;
-	    }
-	}
-	if (state == AgentState.WaitingForFood) {
-	    if (event == AgentEvent.foodDelivered)	{
-		eatFood();
-		state = AgentState.Eating;
-		return true;
-	    }
-	}
-	if (state == AgentState.Eating) {
-	    if (event == AgentEvent.doneEating)	{
-	    readyToPay();
-	    state = AgentState.WaiterImReadyToPay;
-		return true;
-	    }
-	}
-	if (state == AgentState.WaiterImReadyToPay) {
-	    if (event == AgentEvent.waiterToGiveBill) {
-	    payCashierForFood();
-	    state = AgentState.PayingForFood;
-		return true;
-	    }
-	}
-	if (state == AgentState.PayingForFood) {
-	    if (event == AgentEvent.donePaying) {
-	    leaveRestaurant();
-	    state = AgentState.DoingNothing;
-		return true;
-	    }
-	}
-
-	print("No scheduler rule fired, should not happen in FSM, event="+event+" state="+state);
-	return false;
+		    }
+		    // elseif (event == xxx) {}
+		}
+		if (state == AgentState.WaitingInRestaurant) {
+		    if (event == AgentEvent.beingSeated) {
+				makeMenuChoice();
+				state = AgentState.SeatedWithMenu;
+				return true;
+		    }
+		    else if (event == AgentEvent.decidingAboutWaiting) {
+		    	decideToWaitOrLeave();
+		    	state = AgentState.WaitingInRestaurant;
+		    	return true;
+		    }
+		}
+		if (state == AgentState.SeatedWithMenu) {
+		    if (event == AgentEvent.decidedChoice)	{
+			readyToOrder();
+			state = AgentState.WaiterImReadyToOrder;
+			return true;
+		    }
+		}
+		if (state == AgentState.WaiterImReadyToOrder) {
+		    if (event == AgentEvent.waiterToTakeOrder)	{
+			orderFood();
+			state = AgentState.WaitingForFood;
+			return true;
+		    }
+		}
+		if (state == AgentState.WaitingForFood) {
+		    if (event == AgentEvent.foodDelivered)	{
+			eatFood();
+			state = AgentState.Eating;
+			return true;
+		    }
+		}
+		if (state == AgentState.Eating) {
+		    if (event == AgentEvent.doneEating)	{
+		    readyToPay();
+		    state = AgentState.WaiterImReadyToPay;
+			return true;
+		    }
+		}
+		if (state == AgentState.WaiterImReadyToPay) {
+		    if (event == AgentEvent.waiterToGiveBill) {
+		    payCashierForFood();
+		    state = AgentState.PayingForFood;
+			return true;
+		    }
+		}
+		if (state == AgentState.PayingForFood) {
+		    if (event == AgentEvent.donePaying) {
+		    leaveRestaurantAfterEating();
+		    state = AgentState.DoingNothing;
+			return true;
+		    }
+		}
+	
+		print("No scheduler rule fired, should not happen in FSM, event="+event+" state="+state);
+		return false;
     }
     
     // *** ACTIONS ***
     
+    private void decideToWaitOrLeave() {
+    	if((int)(Math.random() * 10) > 2) {	// chance that customer will wait; this code is currently hardcoded but will be improved later
+    		// Customer will wait
+    		print("I will wait.");
+    		host.msgIWillWait(this);
+    	}
+    	else {
+    		// Customer will not wait; customer will leave the restaurant
+    		print("I will not wait. I am leaving.");
+    		host.msgIWillNotWait(this);
+    		leaveRestaurantBeforeBeingSeated();
+    	}
+	}
+
     /** Goes to the restaurant when the customer becomes hungry */
     private void goingToRestaurant() {
-		print("Going to restaurant");
-		guiCustomer.appearInWaitingQueue();
-		host.msgIWantToEat(this);//send him our instance, so he can respond to us
-		stateChanged();
+    	print("Going to restaurant");
+    	guiCustomer.appearInWaitingQueue();
+    	host.msgIWantToEat(this);//send him our instance, so he can respond to us
+    	stateChanged();
     }
     
     /** Starts a timer to simulate the customer thinking about the menu */
@@ -236,10 +262,11 @@ public class CustomerAgent extends Agent {
 		print("Eating for " + hungerLevel*1000 + " milliseconds.");
 		timer.schedule(new TimerTask() {
 		    public void run() {
-			msgDoneEating();
-		    }},
-		    getHungerLevel() * 0);//how long to wait before running task
-			// getHungerLevel() * 1000); change back to this in final version
+		    	msgDoneEating();
+		    }
+		},
+	    getHungerLevel() * 0); //how long to wait before running task
+		// getHungerLevel() * 1000); change back to this in final version
 		stateChanged();
     }
     
@@ -264,10 +291,22 @@ public class CustomerAgent extends Agent {
     }
 
     /** When the customer is done paying for food, he leaves the restaurant */
-    private void leaveRestaurant() {
-		print("Leaving the restaurant");
+    private void leaveRestaurantAfterEating() {
+		print("Leaving the restaurant.");
 		guiCustomer.leave(); //for the animation
 		waiter.msgDoneEatingAndLeaving(this);
+		isHungry = false;
+		stateChanged();
+		gui.setCustomerEnabled(this); //Message to gui to enable hunger button
+	
+		//hack to keep customer getting hungry. Only for non-gui customers
+		if (gui==null) becomeHungryInAWhile();//set a timer to make us hungry.
+    }
+    
+    /** The customer does not want to wait to be seated and leaves or thinks the food is too expensive */
+    private void leaveRestaurantBeforeBeingSeated() {
+		print("Leaving the restaurant.");
+		guiCustomer.leave(); //for the animation
 		isHungry = false;
 		stateChanged();
 		gui.setCustomerEnabled(this); //Message to gui to enable hunger button
@@ -329,6 +368,18 @@ public class CustomerAgent extends Agent {
     /** @return the string representation of the class */
     public String toString() {
     	return "customer " + getName();
+    }
+    
+    /** Sets ID of the customer. This is currently unused (16 Feb 2013, 7:06 PM). */
+    public void setUID(int UID)
+    {
+    	this.UID = UID;
+    }
+    
+    /** Gets ID of the customer. This is currently unused (16 Feb 2013, 7:06 PM). */
+    public int getUID()
+    {
+    	return this.UID;
     }
 }
 

@@ -268,7 +268,7 @@ public class WaiterAgent extends Agent {
     private void giveBill(MyCustomer customer) {
 		DoGiveBill(customer); //animation
 		customer.state = CustomerState.NO_ACTION;
-		customer.cmr.msgHeresYourBill();
+		customer.cmr.msgHereIsYourBill();
 		stateChanged();
     }
     

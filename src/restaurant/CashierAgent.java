@@ -86,7 +86,7 @@ public class CashierAgent extends Agent {
     	double change = (double)Math.round((t.payment - t.bill) * 100) / 100;		// rounds the change to decimal places
     	print(t.customer.getName() + " paid cashier. Change due is $" + change);
     	money += t.payment;
-    	t.customer.msgHeresYourChange(change);
+    	t.customer.msgHereIsYourChange(change);
     	transactions.remove(t);
 	}
 
