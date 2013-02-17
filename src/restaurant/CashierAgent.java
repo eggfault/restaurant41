@@ -2,11 +2,7 @@ package restaurant;
 
 import agent.Agent;
 import java.util.*;
-import restaurant.CookAgent.Status;
 import restaurant.layoutGUI.*;
-
-import java.awt.Color;
-
 
 /** Cashier agent for restaurant.
  *  Collects money from customers.
@@ -82,12 +78,12 @@ public class CashierAgent extends Agent {
     
     // *** ACTIONS ***
     
-    private void handleTransaction(Transaction t) {
-    	double change = (double)Math.round((t.payment - t.bill) * 100) / 100;		// rounds the change to decimal places
-    	print(t.customer.getName() + " paid cashier. Change due is $" + change);
-    	money += t.payment;
-    	t.customer.msgHereIsYourChange(change);
-    	transactions.remove(t);
+    private void handleTransaction(Transaction transaction) {
+    	double change = (double)Math.round((transaction.payment - transaction.bill) * 100) / 100;		// rounds the change to decimal places
+    	print(transaction.customer.getName() + " paid cashier. Change due is $" + change);
+    	money += transaction.payment;
+    	transaction.customer.msgHereIsYourChange(change);
+    	transactions.remove(transaction);
 	}
 
     // *** EXTRA ***

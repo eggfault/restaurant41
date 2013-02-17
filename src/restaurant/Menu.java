@@ -25,5 +25,16 @@ public class Menu {
     {
     	return choices[index];
     }
+    
+    // Currently unused; just using itemAtIndex instead for now...
+    public MenuItem findByName(String searchString)
+    {
+    	for(int i = 0; i < choices.length; i++)
+    		if(choices[i].equals(searchString))
+    			return choices[i];
+    	// Not found: this should NEVER happen if the market code is correct!
+    	System.out.println("ERROR: " + searchString + " not found in Menu!");
+    	return new MenuItem("ERROR!", 0.00);
+    }
 }
     

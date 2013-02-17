@@ -27,7 +27,7 @@ public class RestaurantPanel extends JPanel {
 	//Table[] tables = new Table[nTables];
 	Table[] tables = new Table[gridX * gridY];
 
-	Restaurant restaurant =  new Restaurant("George Li's Restaurant",
+	Restaurant restaurant =  new Restaurant("George Li's Krusty Krab Restaurant",
 			gridX, gridY, grid, tables);
 
 	//Host, cook, waiters and customers
@@ -36,6 +36,7 @@ public class RestaurantPanel extends JPanel {
 	private CashierAgent cashier = new CashierAgent("Squidward", restaurant);
 	private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
 	private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
+	private Vector<MarketAgent> markets = new Vector<MarketAgent>();
 
 	private JPanel restLabel = new JPanel();
 	private ListPanel customerPanel = new ListPanel(this, "Customers");
@@ -98,9 +99,16 @@ public class RestaurantPanel extends JPanel {
 		restaurant.setAnimDelay(500);
 		restaurant.displayRestaurant();
 
+		// Add default agents
 		host.startThread();
 		cook.startThread();
 		cashier.startThread();
+		// Add markets (this is hardcoded for now)
+		markets.add(new MarketAgent("Market A", cashier));
+		markets.add(new MarketAgent("Market B", cashier));
+		// temp code for testing
+		markets.get(0).startThread();
+		markets.get(0).msgRequestOrder(cashier, 0, 3);
 
 		setLayout(new GridLayout(1,2, 20,20));
 		group.setLayout(new GridLayout(1,2, 10,10));
@@ -142,7 +150,8 @@ public class RestaurantPanel extends JPanel {
 				if(temp.getName() == name)
 					gui.updateInfoPanel(temp);
 			}
-		}else if(type.equals("Waiters")) {
+		}
+		else if(type.equals("Waiters")) {
 			for(int i=0; i < waiters.size(); i++) {
 				WaiterAgent temp = waiters.get(i);
 				if(temp.getName() == name)

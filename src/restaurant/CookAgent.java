@@ -150,7 +150,6 @@ public class CookAgent extends Agent {
 		orders.remove(order);
     }
 
-
     // *** EXTRA -- all the simulation routines***
 
     /** Returns the name of the cook */

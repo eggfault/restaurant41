@@ -82,7 +82,7 @@ public class CustomerAgent extends Agent {
     public void msgFollowMeToTable(WaiterAgent waiter, Menu menu) {
 		this.menu = menu;
 		this.waiter = waiter;
-		print("Received msgFollowMeToTable from" + waiter);
+		print("Received msgFollowMeToTable from " + waiter);
 		events.add(AgentEvent.beingSeated);
 		stateChanged();
     }
@@ -221,7 +221,7 @@ public class CustomerAgent extends Agent {
     	print("Going to restaurant");
     	guiCustomer.appearInWaitingQueue();
     	// Small chance that customer will leave because the food is too expensive
-    	if((int)(Math.random() * 10) == 0) {
+    	if ((int)(Math.random() * 10) == 0) {
     		print("The price of the food here is too damn high!");
     		leaveRestaurantBeforeBeingSeated();
     	}
@@ -237,8 +237,8 @@ public class CustomerAgent extends Agent {
 		timer.schedule(new TimerTask() {
 		    public void run() {  
 			msgDecided();	    
-		    }},
-		    3000);//how long to wait before running task
+		    }
+		}, 3000);//how long to wait before running task
 		stateChanged();
     }
     
