@@ -220,7 +220,14 @@ public class CustomerAgent extends Agent {
     private void goingToRestaurant() {
     	print("Going to restaurant");
     	guiCustomer.appearInWaitingQueue();
-    	host.msgIWantToEat(this);//send him our instance, so he can respond to us
+    	// Small chance that customer will leave because the food is too expensive
+    	if((int)(Math.random() * 10) == 0) {
+    		print("The price of the food here is too damn high!");
+    		leaveRestaurantBeforeBeingSeated();
+    	}
+    	else {
+    		host.msgIWantToEat(this);	//send him our instance, so he can respond to us
+    	}
     	stateChanged();
     }
     
