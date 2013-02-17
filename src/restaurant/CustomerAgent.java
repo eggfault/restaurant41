@@ -225,8 +225,14 @@ public class CustomerAgent extends Agent {
     private void payCashierForFood() {
     	// Semi-hack to calculate cost of food
     	bill = choice.getPrice();				// this is for ONE order only, code must be changed if accomodating multiple orders
-    	print("Paying the cashier $" + bill);
-		cashier.msgPayForFood(this);
+    	// if(customer has enough money) {
+	    	double payment = ((int)bill / 5 + 1) * 5;		// truncates bill to nearest int, uses integer division to divide by 5, adds 1, multiplies by 5
+	    													// this effectively makes the customer pay for the food in bills of 5
+	    	print("Paying the cashier $" + payment + " for a bill costing $" + bill);
+	    	cashier.msgPayForFood(this, bill, payment);
+    	//}
+		//else {
+	    //}
 		stateChanged();
     }
 

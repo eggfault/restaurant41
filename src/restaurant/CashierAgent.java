@@ -38,7 +38,7 @@ public class CashierAgent extends Agent {
 
     /** Customer sends this when he is ready to pay.
      * @param customer customer who is paying the cashier. */
-    public void msgPayForFood(CustomerAgent customer) {
+    public void msgPayForFood(CustomerAgent customer, double bill, double payment) {
     	/*
 		for(MyCustomer c:customers) {
 		    if(c.cmr.equals(customer)) {
@@ -47,7 +47,7 @@ public class CashierAgent extends Agent {
 				return;
 		    }
 		}*/
-    	System.out.println("Customer paid cashier");
+    	System.out.println("Customer paid cashier. Change is: $" + (payment-bill));
     }
     
     // *** SCHEDULER ***
