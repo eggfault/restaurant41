@@ -15,7 +15,7 @@ public class MarketAgent extends Agent {
 	// Constants
 	final private int MIN_ITEM_QUANTITY = 0;
     final private int MAX_ITEM_QUANTITY = 10;
-    final private int DELIVERY_TIME = 15000;
+    final private int DELIVERY_TIME = 7500;
 	
 	public enum OrderStatus {requesting, waitingForPayment, needToDeliver, canceled};
     private String name;									// name of the market
@@ -165,7 +165,6 @@ public class MarketAgent extends Agent {
 		    	money += order.receivedPayment;
 		    	// Deliver the order
 		    	cook.msgDeliverOrder(order.name, order.deliverQuantity);
-		    	
 		    }
 		}, DELIVERY_TIME);
     	// Remove order

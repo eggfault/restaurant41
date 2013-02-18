@@ -21,6 +21,7 @@ public class CustomerAgent extends Agent {
     private double money;			// how much money the customer has (this is randomized upon initialization)
     private final double MIN_MONEY = 7.50;
     private final double MAX_MONEY = 26.00;
+    private final int WASH_DISHES_TIME = 5000;
     
     private RestaurantGui gui;
     
@@ -41,7 +42,7 @@ public class CustomerAgent extends Agent {
     private AgentState state = AgentState.DoingNothing;//The start state
     public enum AgentEvent 
 	    {gotHungry, beingSeated, decidedChoice, waiterToTakeOrder, foodDelivered, doneEating,
-    	waiterToGiveBill, donePaying, decidingAboutWaiting};
+    	waiterToGiveBill, donePaying, decidingAboutWaiting, washDishes};
     List<AgentEvent> events = new ArrayList<AgentEvent>();
     
     /** Constructor for CustomerAgent class 
@@ -124,7 +125,11 @@ public class CustomerAgent extends Agent {
     	events.add(AgentEvent.donePaying);
     	stateChanged();
     }
-    
+    /** Cashier sends this if customer cannot not pay him */
+	public void msgGoWashDishes() {
+		events.add(AgentEvent.washDishes);
+		stateChanged();
+	}
     /** Host sends this to ask the customer if he would like to wait to be seated */
     public void msgWouldYouLikeToWait() {
     	events.add(AgentEvent.decidingAboutWaiting);
@@ -210,6 +215,13 @@ public class CustomerAgent extends Agent {
 				return true;
 		    }
 		}
+		if (state == AgentState.PayingForFood) {
+		    if (event == AgentEvent.washDishes) {
+			    washDishesAndLeave();
+			    state = AgentState.DoingNothing;
+				return true;
+		    }
+		}
 	
 		print("No scheduler rule fired, should not happen in FSM, event="+event+" state="+state);
 		return false;
@@ -217,7 +229,17 @@ public class CustomerAgent extends Agent {
     
     // *** ACTIONS ***
     
-    private void decideToWaitOrLeave() {
+    private void washDishesAndLeave() {
+    	print("Washing dishes as punishment (" + WASH_DISHES_TIME + " ms)");
+    	timer.schedule(new TimerTask() {
+		    public void run() {
+		    	print("Finished washing dishes.");
+		    	leaveRestaurantNonNormative();
+		    }
+		}, WASH_DISHES_TIME);
+	}
+
+	private void decideToWaitOrLeave() {
     	if((int)(Math.random() * 10) > 2) {	// chance that customer will wait; this code is currently hardcoded but will be improved later
     		// Customer will wait
     		print("I will wait.");
@@ -227,7 +249,7 @@ public class CustomerAgent extends Agent {
     		// Customer will not wait; customer will leave the restaurant
     		print("I will not wait. I am leaving.");
     		host.msgIWillNotWait(this);
-    		leaveRestaurantBeforeBeingSeated();
+    		leaveRestaurantNonNormative();
     	}
 	}
 
@@ -238,7 +260,7 @@ public class CustomerAgent extends Agent {
     	// Small chance that customer will leave because the food is too expensive
     	if ((int)(Math.random() * 10) == 0) {
     		print("The price of the food here is too damn high!");
-    		leaveRestaurantBeforeBeingSeated();
+    		leaveRestaurantNonNormative();
     	}
     	else {
     		host.msgIWantToEat(this);	//send him our instance, so he can respond to us
@@ -327,7 +349,7 @@ public class CustomerAgent extends Agent {
     	}
 		else {
 			print("Not enough money!");
-			cashier.msgPayForFood(this, bill, 100);			// temporary code to keep the program running
+			cashier.msgIDoNotHaveEnoughMoney(this, bill, 0.00);
 	    }
 		stateChanged();
     }
@@ -346,8 +368,10 @@ public class CustomerAgent extends Agent {
 		if (gui==null) becomeHungryInAWhile();//set a timer to make us hungry.
     }
     
-    /** The customer does not want to wait to be seated and leaves or thinks the food is too expensive */
-    private void leaveRestaurantBeforeBeingSeated() {
+    /** 1. The customer does not want to wait to be seated and leaves, or
+     * 2. The customer thinks the food is too expensive, or
+     * 3. The customer could not pay for food and just finished his punishment */
+    private void leaveRestaurantNonNormative() {
 		print("Leaving the restaurant.");
 		guiCustomer.leave(); //for the animation
 		isHungry = false;

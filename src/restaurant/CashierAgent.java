@@ -9,7 +9,7 @@ import restaurant.layoutGUI.*;
  *  Handles ordering food from market.
  */
 public class CashierAgent extends Agent {
-	public enum TransactionStatus {pending, done}; 			// transaction status
+	public enum TransactionStatus {pending, failedToPay}; 			// transaction status
 	public enum OrderStatus {pending, requested, needToPay};	// order status
 	
     private String name;						// Name of the cashier
@@ -47,11 +47,11 @@ public class CashierAgent extends Agent {
 		 * @param bill the customer's bill
 		 * @param payment the amount of money the customer paid 
 		 */
-		public Transaction(CustomerAgent customer, double bill, double payment) {
+		public Transaction(CustomerAgent customer, double bill, double payment, TransactionStatus status) {
 		    this.customer = customer;
 		    this.bill = bill;
 		    this.payment = payment;
-		    this.status = TransactionStatus.pending;
+		    this.status = status;
 		}
     }
     
@@ -73,9 +73,15 @@ public class CashierAgent extends Agent {
     /** Customer sends this when he is ready to pay.
      * @param customer customer who is paying the cashier. */
     public void msgPayForFood(CustomerAgent customer, double bill, double payment) {
-    	transactions.add(new Transaction(customer, bill, payment));
+    	transactions.add(new Transaction(customer, bill, payment, TransactionStatus.pending));
     	stateChanged();
     }
+    
+    /** Sent by customer when he cannot pay for the food he already ordered and ate */
+	public void msgIDoNotHaveEnoughMoney(CustomerAgent customer, double bill, double payment) {
+		transactions.add(new Transaction(customer, bill, payment, TransactionStatus.failedToPay));
+		stateChanged();
+	}
     
     /** Sent by cook when requesting more of the specified MenuItem */
     public void msgOrderMoreOf(int productIndex, int requestedQuantity) {
@@ -105,6 +111,15 @@ public class CashierAgent extends Agent {
 		    if(t.status == TransactionStatus.pending) {
 		    	synchronized(transactions) {
 		    		handleTransaction(t);
+		    	}
+				return true;
+		    }
+		}
+    	
+    	for(Transaction t:transactions) {
+		    if(t.status == TransactionStatus.failedToPay) {
+		    	synchronized(transactions) {
+		    		punishCustomer(t);
 		    	}
 				return true;
 		    }
@@ -153,6 +168,12 @@ public class CashierAgent extends Agent {
     	print("Paying market $" + payment + " for order!");
     	market.msgPayForOrder(order.productIndex, payment);
     	orders.remove(order);
+    }
+    
+    private void punishCustomer(Transaction transaction) {
+    	print(transaction.customer.getName() + " you filthy scum! Go wash the dishes as punishment or I will call the police!");
+    	transaction.customer.msgGoWashDishes();
+    	transactions.remove(transaction);
     }
 
     // *** EXTRA ***
