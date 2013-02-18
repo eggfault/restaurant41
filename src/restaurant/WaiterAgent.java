@@ -62,15 +62,18 @@ public class WaiterAgent extends Agent {
     Position currentPosition; 
     Position originalPosition;
     Table[] tables; //the gui tables
+	private RestaurantGui gui;
     
 
     /** Constructor for WaiterAgent class
      * @param name name of waiter
+     * @param gui 
      * @param gui reference to the gui */
-    public WaiterAgent(String name, AStarTraversal aStar, Restaurant restaurant, Table[] tables) {
+    public WaiterAgent(String name, AStarTraversal aStar, Restaurant restaurant, Table[] tables, RestaurantGui gui) {
 		super();
 	
 		this.name = name;
+		this.gui = gui;
 	
 		//initialize all the animation objects
 		this.aStar = aStar;
@@ -180,6 +183,8 @@ public class WaiterAgent extends Agent {
     }
     
 	public void msgYouCanTakeABreak() {
+		//gui.setWaiterBreakState(this, true);		// hack to make GUI automatically set the checkbox correctly...not a big deal though
+		//											// this is not vital to the functioning of my program
 		onBreak = true;
 		stateChanged();
 	}
@@ -283,6 +288,7 @@ public class WaiterAgent extends Agent {
     
     private void takeABreak() {
     	final WaiterAgent myself = this;		// so that run() can access "this"
+    	gui.setWaiterBreakState(this, false);
     	timer.schedule(new TimerTask() {
 		    public void run() {
 		    	print("Done with my break!");

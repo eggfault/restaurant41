@@ -54,8 +54,7 @@ public class CustomerAgent extends Agent {
 		this.gui = gui;
 		this.name = name;
 		this.restaurant = restaurant;
-		this.money = (double)Math.round((Math.random()*(MAX_MONEY-MIN_MONEY) + MIN_MONEY) * 100) / 100;	// gives the customer a random amount of money 
-																										// between the min/max bounds for money and rounds it to .00
+		this.money = 0;						// money is set in goingToRestaurant()
 		guiCustomer = new GuiCustomer(name.substring(0,2), new Color(0,255,0), restaurant);
     }
     
@@ -64,8 +63,7 @@ public class CustomerAgent extends Agent {
 		this.gui = null;
 		this.name = name;
 		this.restaurant = restaurant;
-		this.money = (double)Math.round((Math.random()*(MAX_MONEY-MIN_MONEY) + MIN_MONEY) * 100) / 100;	// gives the customer a random amount of money 
-																										// between the min/max bounds for money and rounds it to .00
+		this.money = 0;						// money is set in goingToRestaurant()
 		guiCustomer = new GuiCustomer(name.substring(0,1), new Color(0,255,0), restaurant);
     }
     
@@ -255,7 +253,9 @@ public class CustomerAgent extends Agent {
 
     /** Goes to the restaurant when the customer becomes hungry */
     private void goingToRestaurant() {
-    	print("Going to restaurant");
+    	print("Going to restaurant.");
+    	money = (double)Math.round((Math.random()*(MAX_MONEY-MIN_MONEY) + MIN_MONEY) * 100) / 100;	// gives the customer a random amount of money 
+																									// between the min/max bounds for money and rounds it to .00
     	guiCustomer.appearInWaitingQueue();
     	// Small chance that customer will leave because the food is too expensive
     	if ((int)(Math.random() * 10) == 0) {
@@ -448,5 +448,11 @@ public class CustomerAgent extends Agent {
     {
     	return this.UID;
     }
+
+    /** Used to set the customer's money, such as making him poor (have $0) to show non-normatives */
+	public void setMoney(int money) {
+		this.money = money;
+		print("I have been forced via GUI to now have $" + money);
+	}
 }
 
