@@ -97,17 +97,17 @@ public class WaiterAgent extends Agent {
     /** Customer sends this when they are ready to order.
      * @param customer customer who is ready to order.
      */
-    public void msgImReadyToOrder(CustomerAgent customer){
-	//print("received msgImReadyToOrder from:"+customer);
-	for(int i=0; i < customers.size(); i++){
-	    //if(customers.get(i).cmr.equals(customer)){
-	    if (customers.get(i).cmr == customer){
-		customers.get(i).state = CustomerState.READY_TO_ORDER;
-		stateChanged();
-		return;
-	    }
-	}
-	System.out.println("msgImReadyToOrder in WaiterAgent, didn't find him?");
+    public void msgImReadyToOrder(CustomerAgent customer) {
+		//print("received msgImReadyToOrder from:"+customer);
+		for(int i=0; i < customers.size(); i++) {
+			    //if(customers.get(i).cmr.equals(customer)) {
+			    if (customers.get(i).cmr == customer){
+				customers.get(i).state = CustomerState.READY_TO_ORDER;
+				stateChanged();
+				return;
+		    }
+		}
+		System.out.println("msgImReadyToOrder in WaiterAgent, didn't find him?");
     }
     
     /** Customer sends this when they are ready to pay.

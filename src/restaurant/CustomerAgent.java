@@ -135,9 +135,9 @@ public class CustomerAgent extends Agent {
 		//Simple finite state machine
 		if (state == AgentState.DoingNothing) {
 		    if (event == AgentEvent.gotHungry)	{
-			goingToRestaurant();
-			state = AgentState.WaitingInRestaurant;
-			return true;
+				goingToRestaurant();
+				state = AgentState.WaitingInRestaurant;
+				return true;
 		    }
 		    // elseif (event == xxx) {}
 		}
@@ -151,6 +151,11 @@ public class CustomerAgent extends Agent {
 		    	decideToWaitOrLeave();
 		    	state = AgentState.WaitingInRestaurant;
 		    	return true;
+		    }
+		    else if (event == AgentEvent.gotHungry)	{		// only happens if customer leaves and is manually set to Hungry again
+				goingToRestaurant();
+				state = AgentState.WaitingInRestaurant;
+				return true;
 		    }
 		}
 		if (state == AgentState.SeatedWithMenu) {
@@ -300,6 +305,7 @@ public class CustomerAgent extends Agent {
     /** When the customer is done paying for food, he leaves the restaurant */
     private void leaveRestaurantAfterEating() {
 		print("Leaving the restaurant.");
+		
 		guiCustomer.leave(); //for the animation
 		waiter.msgDoneEatingAndLeaving(this);
 		isHungry = false;

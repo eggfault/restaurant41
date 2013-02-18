@@ -43,6 +43,11 @@ public class Inventory {
 		contents.get(name).quantity -= amount;
 	}
 	
+	/** Adds specified amount to quantity of item */
+	public void addToQuantity(String name, int amount) {
+		contents.get(name).quantity += amount;
+	}
+	
 	public int size() {
 		return contents.size();
 	}

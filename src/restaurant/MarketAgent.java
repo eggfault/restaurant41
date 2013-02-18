@@ -2,6 +2,8 @@ package restaurant;
 
 import agent.Agent;
 import java.util.*;
+
+import restaurant.CashierAgent.OrderStatus;
 import restaurant.layoutGUI.*;
 
 /** Market agent for restaurant.
@@ -12,25 +14,25 @@ public class MarketAgent extends Agent {
 	// Constants
 	final private int MIN_ITEM_QUANTITY = 0;
     final private int MAX_ITEM_QUANTITY = 10;
+    final private int DELIVERY_TIME = 3000;
 	
-	public enum OrderStatus {requesting, pending, done, canceled};
+	public enum OrderStatus {requesting, waitingForPayment, needToDeliver, canceled};
     private String name;									// name of the market
-    private CashierAgent cashier;							// cashier who places the orders
     private Menu menu;										// market's copy of the menu
     private List<Order> orders;								// list of all the orders
     private Inventory inventory;							// inventory of all MenuItems
     private int money;										// Amount of money the market has
     														// (this is not actually used for anything, but the money is still tracked)
     Timer timer = new Timer();								// timer for simulations
+    CookAgent cook;											// the cook to deliver orders to
 
     /** Constructor for CashierAgent class
      * @param name name of the cashier
      */
-    public MarketAgent(String name, CashierAgent cashier) {
+    public MarketAgent(String name) {
 		super();
 	
 		this.name = name;
-		this.cashier = cashier;
 		
 		menu = new Menu();
 		orders = new ArrayList<Order>();
@@ -44,8 +46,10 @@ public class MarketAgent extends Agent {
 		public CashierAgent cashier;
 		public int productIndex;
 		public int quantity;
+		public int deliverQuantity;
 		public OrderStatus status;
 		public double myMarketPrice;
+		public double receivedPayment;
 	
 		/** Constructor for Order class 
 		 * @param customer customer that this transaction is for
@@ -59,6 +63,8 @@ public class MarketAgent extends Agent {
 		    
 		    status = OrderStatus.requesting;
 		    name = menu.itemAtIndex(productIndex).getName();
+		    receivedPayment = 0.00;
+		    deliverQuantity = 0;
 		}
     }
     
@@ -70,6 +76,19 @@ public class MarketAgent extends Agent {
     	orders.add(new Order(cashier, productIndex, quantity));
     	stateChanged();
     }
+    
+    /** Cashier sends this when he pays for an order after receiving the invoice */
+	public void msgPayForOrder(int productIndex, double payment) {
+		// Find the matching order
+		for(Order o:orders) {
+			if(o.productIndex == productIndex) {
+				System.out.println("found matching order");
+				o.receivedPayment = payment;
+				o.status = OrderStatus.needToDeliver;
+			}
+		}
+		stateChanged();
+	}
     
     // *** SCHEDULER ***
     protected boolean pickAndExecuteAnAction() {
@@ -89,12 +108,21 @@ public class MarketAgent extends Agent {
 		    }
 		}
     	
+    	for(Order o:orders) {
+		    if(o.status == OrderStatus.needToDeliver) {
+		    	synchronized(orders) {
+		    		deliverOrder(o);
+		    	}
+				return true;
+		    }
+		}
+    	
     	return false;
     }
     
     // *** ACTIONS ***
-    
-    private void calculateOrder(Order order) {
+
+	private void calculateOrder(Order order) {
     	print("Order requested: " + order.quantity + " orders of " + order.name);
     	int myQuantity = inventory.getQuantity(order.name);
     	// Check if the market has any of the request product in stock
@@ -104,11 +132,15 @@ public class MarketAgent extends Agent {
     		// Market price will be 1/3 to 1/2 of the menu price
     		order.myMarketPrice = 1/(Math.random() + 2)*menu.itemAtIndex(order.productIndex).getPrice();
     		order.cashier.msgHereIsYourOrderInvoice(order.productIndex, order.myMarketPrice*order.quantity);
-    		order.status = OrderStatus.pending;
+    		order.deliverQuantity = order.quantity;
+    		order.status = OrderStatus.waitingForPayment;
     	}
     	else if(myQuantity > 0) {					// not enough to fulfill request but more than 0
     		print("We do not have " + order.quantity + " " + order.name + "s but we do have " + inventory.getQuantity(order.name) + " of them!");
-    		order.status = OrderStatus.pending;
+    		order.myMarketPrice = 1/(Math.random() + 2)*menu.itemAtIndex(order.productIndex).getPrice();
+    		order.cashier.msgHereIsYourOrderInvoice(order.productIndex, order.myMarketPrice*myQuantity);
+    		order.deliverQuantity = myQuantity;			// only deliver what the market can provide at this exact time
+    		order.status = OrderStatus.waitingForPayment;
     	}
     	else {																// none in stock
     		print("Sorry, we do not have any " + order.name + "s in stock!");
@@ -117,12 +149,35 @@ public class MarketAgent extends Agent {
     	stateChanged();
 	}
 
+    private void deliverOrder(final Order order) {
+		// Here can be a check to see if cashier gave enough money, but this is not in the v4.1 requirement so I will implement later
+    	print("Received " + order.receivedPayment + " from cashier and now delivering order for " + order.name + " to cook! (" + DELIVERY_TIME + " ms)");
+    	// Have a delay
+    	// (Unused: not needed for v4.1)
+    	/*
+    	timer.schedule(new TimerTask() {
+		    public void run() {
+		    	money += order.receivedPayment;
+		    	cook.msgDeliverOrder(order.name, order.deliverQuantity);
+		    	orders.remove(order);
+		    }
+		}, DELIVERY_TIME);
+    	*/
+    	money += order.receivedPayment;
+    	cook.msgDeliverOrder(order.name, order.deliverQuantity);
+    	orders.remove(order);
+	}
+	
     // *** EXTRA ***
 
 	/** Returns the name of the market */
     public String getName() {
         return name;
     }
+
+	public void setCook(CookAgent cook) {
+		this.cook = cook;
+	}
 }
 
 

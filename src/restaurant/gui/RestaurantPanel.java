@@ -41,7 +41,7 @@ public class RestaurantPanel extends JPanel {
 	private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
 	private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
 	private java.util.List<MarketAgent> markets = new ArrayList<MarketAgent>();
-	private MarketAgent market = new MarketAgent("Market", cashier);
+	private MarketAgent market = new MarketAgent("Market");
 
 	private JPanel restLabel = new JPanel();
 	private ListPanel customerPanel = new ListPanel(this, "Customers");
@@ -117,6 +117,7 @@ public class RestaurantPanel extends JPanel {
 		host.startThread();
 		cook.setCashier(cashier);
 		cook.startThread();
+		market.setCook(cook);
 		market.startThread();
 		cashier.setMarket(market);
 		cashier.startThread();

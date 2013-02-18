@@ -10,7 +10,7 @@ import restaurant.layoutGUI.*;
  */
 public class CashierAgent extends Agent {
 	public enum TransactionStatus {pending, done}; 			// transaction status
-	public enum OrderStatus {pending, requested, needToPay, done};	// order status
+	public enum OrderStatus {pending, requested, needToPay};	// order status
 	
     private String name;						// Name of the cashier
     private List<Transaction> transactions;		// List of all the transactions
@@ -59,11 +59,13 @@ public class CashierAgent extends Agent {
     	public int productIndex;
     	public int quantity;
     	public OrderStatus status;
+    	public double cost;
     	
     	public Order(int productIndex, int quantity) {
     		this.productIndex = productIndex;
     		this.quantity = quantity;
     		this.status = OrderStatus.pending;
+    		cost = 0;
     	}
     }
     
@@ -86,7 +88,8 @@ public class CashierAgent extends Agent {
 		print("Received invoice from " + market.getName() + " for a price of $" + orderPrice);
 		// Find the matching order
 		for(Order o:orders) {
-			synchronized(orders) {
+			if(o.productIndex == productIndex) {
+				o.cost = orderPrice;
 				o.status = OrderStatus.needToPay;
 			}
 		}
@@ -114,6 +117,14 @@ public class CashierAgent extends Agent {
 		    }
 		}
     	
+    	for(Order o:orders) {
+    		if(o.status == OrderStatus.needToPay) {
+    			synchronized(orders) {
+    				payForOrder(o);
+    			}
+    		}
+    	}
+    	
     	return false;
     }
     
@@ -130,6 +141,15 @@ public class CashierAgent extends Agent {
     private void placeOrder(Order order) {
     	market.msgRequestOrder(this, order.productIndex, order.quantity);
     	order.status = OrderStatus.requested;
+    	stateChanged();
+    }
+    
+    private void payForOrder(Order order) {
+    	double payment = order.cost;
+    	money -= payment;
+    	print("Paying market " + payment + " for order!");
+    	market.msgPayForOrder(order.productIndex, payment);
+    	orders.remove(order);
     }
 
     // *** EXTRA ***
