@@ -285,13 +285,22 @@ public class CustomerAgent extends Agent {
     /** When the customer is done eating, he calculates the bill and attempts to pay the cashier */
     private void payCashierForFood() {
     	// Semi-hack to calculate cost of food
+    	print("I have $" + money);
     	bill = choice.getPrice();				// this is for ONE order only, code must be changed if accomodating multiple orders
     	if(money >= bill) {
 	    	double payment = ((int)bill / 5 + 1) * 5;		// truncates bill to nearest int, uses integer division to divide by 5, adds 1, multiplies by 5
-	    													// this effectively makes the customer pay for the food in bills of 5
-	    	print("I have $" + money);
-	    	print("Paying the cashier $" + payment + " for a bill costing $" + bill);
-	    	money -= payment;
+	    													// this effectively makes the customer pay for the food in bills of 5	    	
+	    	if(money >= payment) {
+		    	print("Paying the cashier $" + payment + " for a bill costing $" + bill);
+		    	money -= payment;
+	    	}
+	    	else {
+	    		// Pay with ALL the money. This still needs to be fixed up more later on for realism.
+	    		// Customer shouldn't pay with coins if it's unnecessary to do so
+	    		// But that takes some extra calculations which are low priority for v4.1...
+	    		payment = money;
+	    		money -= payment;
+	    	}
 	    	print("Now I have $" + money + " left.");
 	    	cashier.msgPayForFood(this, bill, payment);
     	}

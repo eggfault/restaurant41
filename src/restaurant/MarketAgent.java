@@ -14,7 +14,7 @@ public class MarketAgent extends Agent {
 	// Constants
 	final private int MIN_ITEM_QUANTITY = 0;
     final private int MAX_ITEM_QUANTITY = 10;
-    final private int DELIVERY_TIME = 3000;
+    final private int DELIVERY_TIME = 150000;
 	
 	public enum OrderStatus {requesting, waitingForPayment, needToDeliver, canceled};
     private String name;									// name of the market
@@ -145,7 +145,7 @@ public class MarketAgent extends Agent {
     	else {																// none in stock
     		print("Sorry, we do not have any " + order.name + "s in stock!");
     		// Random replineshment
-    		inventory.addToQuantity(order.name, (int)Math.random()*4);			// MAGIC NUMBER!: 4 is a temporarily a magic number for ordering items that are out of stock
+    		inventory.addToQuantity(order.name, (int)Math.random()*5);			// MAGIC NUMBER!: 4 is a temporarily a magic number for ordering items that are out of stock
     		order.status = OrderStatus.canceled;			// cancel the order
     	}
     	stateChanged();
@@ -155,8 +155,6 @@ public class MarketAgent extends Agent {
 		// Here can be a check to see if cashier gave enough money, but this is not in the v4.1 requirement so I will implement later
     	print("Received " + order.receivedPayment + " from cashier and now delivering order for " + order.name + " to cook! (" + DELIVERY_TIME + " ms)");
     	// Have a delay
-    	// (Unused: not needed for v4.1)
-    	/*
     	timer.schedule(new TimerTask() {
 		    public void run() {
 		    	money += order.receivedPayment;
@@ -164,7 +162,7 @@ public class MarketAgent extends Agent {
 		    	orders.remove(order);
 		    }
 		}, DELIVERY_TIME);
-    	*/
+
     	// Subtract from inventory
     	inventory.subtractFromQuantity(order.name, order.deliverQuantity);
     	// Pocket the money

@@ -176,20 +176,26 @@ public class CookAgent extends Agent {
     private void DoCooking(final Order order) {
 		print("Cooking: " + order + " for table:" + (order.tableNum+1));
 		
-		// Subtract 1 of this item from the cook's inventory
-		inventory.subtractFromQuantity(order.choice.getName(), 1);
+		// Check if cook has any of the order in his inventory
+		if(inventory.getQuantity("Steak") > 0) {
+			// Subtract 1 of this item from the cook's inventory
+			inventory.subtractFromQuantity(order.choice.getName(), 1);
+			
+			// Put it on the grill. Do GUI stuff
+			order.food = new Food(order.choice.getName().substring(0,2), new Color(0,255,255), restaurant);
+			order.food.cookFood();
 		
-		// Put it on the grill. Do GUI stuff
-		order.food = new Food(order.choice.getName().substring(0,2), new Color(0,255,255), restaurant);
-		order.food.cookFood();
-	
-		timer.schedule(new TimerTask() {
-		    public void run() {//this routine is like a message reception    
-				order.status = OrderStatus.done;
-				stateChanged();
-		    }
-		}, (int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000));		// uses mapping to find name of the order in inventory and retrieves its cook time
-		
+			timer.schedule(new TimerTask() {
+			    public void run() {//this routine is like a message reception    
+					order.status = OrderStatus.done;
+					stateChanged();
+			    }
+			}, (int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000));		// uses mapping to find name of the order in inventory and retrieves its cook time
+		}
+		else {
+			// Out of this item!
+			print("Looks like I am out of " + order.toString() + "!");
+		}
 		// Now check the inventory to see if anything is running low
 		checkInventoryForLowStock();
     }
