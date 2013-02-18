@@ -15,11 +15,11 @@ import java.util.*;
  * Interacts with customers, host, and cook */
 public class WaiterAgent extends Agent {
 
-   //State variables for Waiter
+	// State variables for Waiter
     private boolean onBreak = false;
+    final private double CHANCE_TO_WANT_A_BREAK = 0.25;
 
-    //State constants for Customers
-
+    // State constants for Customers
     public enum CustomerState 
 	{NEED_SEATED, READY_TO_ORDER, ORDER_PENDING, ORDER_READY, IS_DONE, NO_ACTION, READY_TO_PAY, REORDER};
 
@@ -66,8 +66,7 @@ public class WaiterAgent extends Agent {
     /** Constructor for WaiterAgent class
      * @param name name of waiter
      * @param gui reference to the gui */
-    public WaiterAgent(String name, AStarTraversal aStar,
-		       Restaurant restaurant, Table[] tables) {
+    public WaiterAgent(String name, AStarTraversal aStar, Restaurant restaurant, Table[] tables) {
 		super();
 	
 		this.name = name;
@@ -91,6 +90,7 @@ public class WaiterAgent extends Agent {
 		MyCustomer c = new MyCustomer(customer, tableNum);
 		c.state = CustomerState.NEED_SEATED;
 		customers.add(c);
+		host.msgIWantToTakeABreak(this);
 		stateChanged();
     }
 
@@ -303,40 +303,40 @@ public class WaiterAgent extends Agent {
     /** Gives any pending orders to the cook 
      * @param customer customer that needs food cooked */
     private void giveOrderToCook(MyCustomer customer) {
-	//In our animation the waiter does not move to the cook in
-	//order to give him an order. We assume some sort of electronic
-	//method implemented as our message to the cook. So there is no
-	//animation analog, and hence no DoXXX routine is needed.
-	print("Giving " + customer.cmr + "'s choice of " + customer.choice.getName() + " to cook");
-
-
-	customer.state = CustomerState.NO_ACTION;
-	cook.msgHereIsAnOrder(this, customer.tableNum, customer.choice);
-	stateChanged();
+		//In our animation the waiter does not move to the cook in
+		//order to give him an order. We assume some sort of electronic
+		//method implemented as our message to the cook. So there is no
+		//animation analog, and hence no DoXXX routine is needed.
+		print("Giving " + customer.cmr + "'s choice of " + customer.choice.getName() + " to cook");
 	
-	//Here's a little animation hack. We put the first two
-	//character of the food name affixed with a ? on the table.
-	//Simply let's us see what was ordered.
-	tables[customer.tableNum].takeOrder(customer.choice.getName().substring(0,2)+"?");
-	restaurant.placeFood(tables[customer.tableNum].foodX(),
-			     tables[customer.tableNum].foodY(),
-			     new Color(255, 255, 255), customer.choice.getName().substring(0,2)+"?");
+	
+		customer.state = CustomerState.NO_ACTION;
+		cook.msgHereIsAnOrder(this, customer.tableNum, customer.choice);
+		stateChanged();
+		
+		//Here's a little animation hack. We put the first two
+		//character of the food name affixed with a ? on the table.
+		//Simply let's us see what was ordered.
+		tables[customer.tableNum].takeOrder(customer.choice.getName().substring(0,2)+"?");
+		restaurant.placeFood(tables[customer.tableNum].foodX(),
+				     tables[customer.tableNum].foodY(),
+				     new Color(255, 255, 255), customer.choice.getName().substring(0,2)+"?");
     }
 
     /** Gives food to the customer 
      * @param customer customer whose food is ready */
     private void giveFoodToCustomer(MyCustomer customer) {
-	DoGiveFoodToCustomer(customer);//Animation
-	customer.state = CustomerState.NO_ACTION;
-	customer.cmr.msgHereIsYourFood(customer.choice);
-	stateChanged();
+		DoGiveFoodToCustomer(customer);//Animation
+		customer.state = CustomerState.NO_ACTION;
+		customer.cmr.msgHereIsYourFood(customer.choice);
+		stateChanged();
     }
     /** Starts a timer to clear the table 
      * @param customer customer whose table needs cleared */
     private void clearTable(MyCustomer customer) {
-	DoClearingTable(customer);
-	customer.state = CustomerState.NO_ACTION;
-	stateChanged();
+		DoClearingTable(customer);
+		customer.state = CustomerState.NO_ACTION;
+		stateChanged();
     }
 
     // Animation Actions
@@ -394,6 +394,10 @@ public class WaiterAgent extends Agent {
 		customer.food.remove(); //remove the food from table animation
 		host.msgTableIsFree(customer.tableNum);
 		customers.remove(customer);
+		// See if waiter wants to take a break
+		if(Math.random() <= CHANCE_TO_WANT_A_BREAK) {
+			host.msgIWantToTakeABreak(this);
+		}
 		stateChanged();
     }
     private void DoMoveToOriginalPosition() {

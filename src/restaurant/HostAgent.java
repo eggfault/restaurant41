@@ -30,13 +30,16 @@ public class HostAgent extends Agent {
     /** Private class to hold waiter information and state */
     private class MyWaiter {
 		public WaiterAgent wtr;
-		public boolean working = true;
+		public boolean working;
+		public boolean wantsABreak;
 	
 		/** Constructor for MyWaiter class
 		 * @param waiter
 		 */
 		public MyWaiter(WaiterAgent waiter) {
 		    wtr = waiter;
+		    working = true;
+		    wantsABreak = false;
 		}
     }
     
@@ -52,20 +55,20 @@ public class HostAgent extends Agent {
 		}
     }
     
-    //List of all the customers that need a table
+    // List of all the customers that need a table
     private List<MyCustomer> waitList =
 		Collections.synchronizedList(new ArrayList<MyCustomer>());
 
-    //List of all waiter that exist.
+    // List of all waiter that exist.
     private List<MyWaiter> waiters =
 		Collections.synchronizedList(new ArrayList<MyWaiter>());
-    private int nextWaiter = 0; //The next waiter that needs a customer
+    private int nextWaiter = 0; // The next waiter that needs a customer
     
-    //List of all the tables
+    // List of all the tables
     int nTables;
     private Table tables[];
 
-    //Name of the host
+    // Name of the host
     private String name;
 
     /** Constructor for HostAgent class 
@@ -99,7 +102,7 @@ public class HostAgent extends Agent {
     
     /** Customer decides to wait to be seated */
 	public void msgIWillWait(CustomerAgent customer) {
-		// Do nothing for now
+		// Do not do anything
 		// Customer will simply remain in the waitList
 		print("Ok, thank you for deciding to wait. We will serve you momentarily.");
 	}
@@ -118,11 +121,37 @@ public class HostAgent extends Agent {
 		// Some parting words </3
 		print("Well, screw you too. Goodbye.");
 	}
+	
+	/** Sent by the waiter when he wants to take a break */
+	public void msgIWantToTakeABreak(WaiterAgent waiter) {
+		// Find the matching waiter
+		for(MyWaiter w:waiters) {
+			if(w.wtr == waiter) {
+				synchronized(waiters) {
+					w.wantsABreak = true;
+					return;
+				}
+			}
+		}
+	}
     
     // *** SCHEDULER ***
     /** Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
 	
+    	for(MyWaiter w:waiters) {
+			if(w.wantsABreak) {
+				// Waiter wants a break, check if the restaurant is busy
+				// This checks if number of free waiters > number of customers waiting to be seated
+				if(waiters.size() - tables.length > waitList.size()) {
+					tellWaiterToTakeABreak(w);
+				}
+				else {
+					denyWaiterABreak(w);
+				}
+			}
+		}
+    	
 		if(!waitList.isEmpty() && !waiters.isEmpty()) {
 			synchronized(waiters) {
 				//Finds the next waiter that is working
@@ -197,7 +226,17 @@ public class HostAgent extends Agent {
 		stateChanged();
     }
     
-    //Gautam Nayak - Gui calls this when table is created in animation
+    public void tellWaiterToTakeABreak(MyWaiter waiter) {
+    	print("Ok " + waiter.wtr.getName() + ", you can take a break.");
+    	waiter.wantsABreak = false;
+    }
+    
+    public void denyWaiterABreak(MyWaiter waiter) {
+    	print("No, " + waiter.wtr.getName() + " we need you right now. Keep working.");
+    	waiter.wantsABreak = false;
+    }
+    
+    // Gautam Nayak - Gui calls this when table is created in animation
     public void addTable() {
 		nTables++;
 		Table[] tempTables = new Table[nTables];
