@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /** Panel in frame that contains all the restaurant information,
@@ -16,6 +17,9 @@ public class RestaurantPanel extends JPanel {
 	//create animation
 	static int gridX = 20;
 	static int gridY = 15;
+	
+	// Number of agents
+	final private int NUMBER_OF_MARKETS = 5;
 
 	//**Decide how many tables to have
 	private int nTables = 4;
@@ -36,7 +40,8 @@ public class RestaurantPanel extends JPanel {
 	private CashierAgent cashier = new CashierAgent("Squidward", restaurant);
 	private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
 	private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
-	private Vector<MarketAgent> markets = new Vector<MarketAgent>();
+	private java.util.List<MarketAgent> markets = new ArrayList<MarketAgent>();
+	private MarketAgent market = new MarketAgent("Market", cashier);
 
 	private JPanel restLabel = new JPanel();
 	private ListPanel customerPanel = new ListPanel(this, "Customers");
@@ -98,17 +103,23 @@ public class RestaurantPanel extends JPanel {
 		}
 		restaurant.setAnimDelay(500);
 		restaurant.displayRestaurant();
-
-		// Add default agents
+		
+		// Add market agents
+		// This is currently unused in v4.1
+		/*
+		for(int i = 0; i < NUMBER_OF_MARKETS; i ++) {
+			MarketAgent newMarket = new MarketAgent("Market " + (char)((int)'A' + i), cashier);
+			newMarket.startThread();
+			markets.add(newMarket);
+		}
+		*/
+		// Add all other default agents
 		host.startThread();
+		cook.setCashier(cashier);
 		cook.startThread();
+		market.startThread();
+		cashier.setMarket(market);
 		cashier.startThread();
-		// Add markets (this is hardcoded for now)
-		markets.add(new MarketAgent("Market A", cashier));
-		markets.add(new MarketAgent("Market B", cashier));
-		// temp code for testing
-		markets.get(0).startThread();
-		markets.get(0).msgRequestOrder(cashier, 0, 3);
 
 		setLayout(new GridLayout(1,2, 20,20));
 		group.setLayout(new GridLayout(1,2, 10,10));

@@ -15,8 +15,10 @@ import java.awt.Color;
  */
 public class CookAgent extends Agent {
 	// Constants
-    final private int MIN_ITEM_QUANTITY = 2;
+    final private int MIN_ITEM_QUANTITY = 3;
     final private int MAX_ITEM_QUANTITY = 5;
+    final private int LOW_STOCK = 4;				// when the stock is <= LOW_STOCK, an order for more will be placed
+    final private int STOCK_ORDER_QUANTITY = 3;		// how many more of an item to place in an order when it runs low
 	
     // List of all the orders
     private List<Order> orders;
@@ -25,6 +27,10 @@ public class CookAgent extends Agent {
 
     // Name of the cook
     private String name;
+    
+    private Menu menu;
+    
+    CashierAgent cashier;
 
     // Timer for simulation
     Timer timer = new Timer();
@@ -38,9 +44,10 @@ public class CookAgent extends Agent {
 		
 		this.name = name;
 		this.restaurant = restaurant;
+		
 		orders  = new ArrayList<Order>();
 		// Create the restaurant's inventory.
-		Menu menu = new Menu();
+		menu = new Menu();
 		inventory = new Inventory(menu, MIN_ITEM_QUANTITY, MAX_ITEM_QUANTITY);
     }
     
@@ -134,7 +141,11 @@ public class CookAgent extends Agent {
 
     private void DoCooking(final Order order) {
 		print("Cooking: " + order + " for table:" + (order.tableNum+1));
-		// put it on the grill. gui stuff
+		
+		// Subtract 1 of this item from the cook's inventory
+		inventory.subtractFromQuantity(order.choice.getName(), 1);
+		
+		// Put it on the grill. Do GUI stuff
 		order.food = new Food(order.choice.getName().substring(0,2), new Color(0,255,255), restaurant);
 		order.food.cookFood();
 	
@@ -144,11 +155,29 @@ public class CookAgent extends Agent {
 				stateChanged();
 		    }
 		}, (int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000));		// uses mapping to find name of the order in inventory and retrieves its cook time
+		
+		// Now check the inventory to see if anything is running low
+		checkInventoryForLowStock();
     }
     
     public void DoPlacement(Order order) {
 		print("Order finished: " + order + " for table:" + (order.tableNum+1));
 		order.food.placeOnCounter();
+    }
+    
+    private void checkInventoryForLowStock() {
+    	print("Checking inventory for low stock...");
+    	for(int i = 0; i < menu.getLength(); i ++) {
+    		String menuItemName = menu.itemAtIndex(i).getName();
+    		if(inventory.getQuantity(menuItemName) <= LOW_STOCK) {
+    			cashier.msgOrderMoreOf(i, STOCK_ORDER_QUANTITY);
+    			print(cashier.getName() + ", please order some more " + menuItemName);
+    		}
+    	}
+    }
+    
+    public void setCashier(CashierAgent cashier) {
+    	this.cashier = cashier;
     }
 }
 

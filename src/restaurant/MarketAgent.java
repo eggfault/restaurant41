@@ -11,9 +11,9 @@ import restaurant.layoutGUI.*;
 public class MarketAgent extends Agent {
 	// Constants
 	final private int MIN_ITEM_QUANTITY = 0;
-    final private int MAX_ITEM_QUANTITY = 5;
+    final private int MAX_ITEM_QUANTITY = 10;
 	
-	public enum Status {requesting, pending, done}; 		// transaction status
+	public enum OrderStatus {requesting, pending, done, canceled};
     private String name;									// name of the market
     private CashierAgent cashier;							// cashier who places the orders
     private Menu menu;										// market's copy of the menu
@@ -44,7 +44,8 @@ public class MarketAgent extends Agent {
 		public CashierAgent cashier;
 		public int productIndex;
 		public int quantity;
-		public Status status;
+		public OrderStatus status;
+		public double myMarketPrice;
 	
 		/** Constructor for Order class 
 		 * @param customer customer that this transaction is for
@@ -56,7 +57,7 @@ public class MarketAgent extends Agent {
 		    this.quantity = quantity;
 		    this.productIndex = productIndex;
 		    
-		    status = Status.requesting;
+		    status = OrderStatus.requesting;
 		    name = menu.itemAtIndex(productIndex).getName();
 		}
     }
@@ -73,16 +74,17 @@ public class MarketAgent extends Agent {
     // *** SCHEDULER ***
     protected boolean pickAndExecuteAnAction() {
     	
-    	for(Order o:orders) {
-		    if(o.status == Status.requesting) {
-				calculateOrder(o);
-				return true;
-		    }
-		}
+    	// Delete any canceled orders (supposed be concurrent-modification-safe, but probably isn't)
+    	Iterator<Order> iter = orders.iterator();
+    	while(iter.hasNext()) {
+    		if(iter.next().status == OrderStatus.canceled) iter.remove();
+    	}
     	
     	for(Order o:orders) {
-		    if(o.status == Status.requesting) {
-				calculateOrder(o);
+		    if(o.status == OrderStatus.requesting) {
+		    	synchronized(orders) {
+		    		calculateOrder(o);
+		    	}
 				return true;
 		    }
 		}
@@ -98,17 +100,21 @@ public class MarketAgent extends Agent {
     	// Check if the market has any of the request product in stock
     	if(myQuantity >= order.quantity) {			// enough in stock to completely fulfill the request
     		print("We can provide " + order.quantity + " " + order.name + "s because we have " + myQuantity + " of them in stock!");
-    		//order.cashier.msgHereIsYourOrderInvoice();
-    		order.status = Status.pending;
+    		// Calculate invoice
+    		// Market price will be 1/3 to 1/2 of the menu price
+    		order.myMarketPrice = 1/(Math.random() + 2)*menu.itemAtIndex(order.productIndex).getPrice();
+    		order.cashier.msgHereIsYourOrderInvoice(order.productIndex, order.myMarketPrice*order.quantity);
+    		order.status = OrderStatus.pending;
     	}
     	else if(myQuantity > 0) {					// not enough to fulfill request but more than 0
     		print("We do not have " + order.quantity + " " + order.name + "s but we do have " + inventory.getQuantity(order.name) + " of them!");
-    		order.status = Status.pending;
+    		order.status = OrderStatus.pending;
     	}
     	else {																// none in stock
     		print("Sorry, we do not have any " + order.name + "s in stock!");
-    		orders.remove(order);			// cancel the order
+    		order.status = OrderStatus.canceled;			// cancel the order
     	}
+    	stateChanged();
 	}
 
     // *** EXTRA ***

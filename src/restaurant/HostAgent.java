@@ -108,8 +108,7 @@ public class HostAgent extends Agent {
 	public void msgIWillNotWait(CustomerAgent customer) {
 		// Find customer and remove him from the waitlist
 		MyCustomer tc = new MyCustomer(customer);
-		for(MyCustomer c:waitList)
-		{
+		for(MyCustomer c:waitList) {
 			synchronized(waitList) {
 				if(c.cmr.equals(customer))
 					tc = c;

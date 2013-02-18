@@ -30,13 +30,20 @@ public class Inventory {
 		}
 	}
 
-	public MenuItem getProduct(String name)
-	{
+	public MenuItem getProduct(String name) {
 		return contents.get(name).product;
 	}
 	
-	public int getQuantity(String name)
-	{
+	public int getQuantity(String name) {
 		return contents.get(name).quantity;
+	}
+	
+	/** Removes specified amount from quantity of item */
+	public void subtractFromQuantity(String name, int amount) {
+		contents.get(name).quantity -= amount;
+	}
+	
+	public int size() {
+		return contents.size();
 	}
 }
