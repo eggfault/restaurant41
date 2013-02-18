@@ -58,9 +58,6 @@ public class MarketAgent extends Agent {
 		    
 		    status = Status.requesting;
 		    name = menu.itemAtIndex(productIndex).getName();
-		    
-		    // Product availablity is currently hardcoded
-		    // code
 		}
     }
     
@@ -116,7 +113,7 @@ public class MarketAgent extends Agent {
 
     // *** EXTRA ***
 
-	/** Returns the name of the cashier */
+	/** Returns the name of the market */
     public String getName() {
         return name;
     }
