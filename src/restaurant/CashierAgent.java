@@ -90,10 +90,12 @@ public class CashierAgent extends Agent {
 		for(Order o:orders) {
 			if(o.productIndex == productIndex) {
 				o.cost = orderPrice;
+				stateChanged();
 				o.status = OrderStatus.needToPay;
+				stateChanged();
+				return;
 			}
 		}
-		stateChanged();
 	}
     
     // *** SCHEDULER ***
@@ -122,6 +124,7 @@ public class CashierAgent extends Agent {
     			synchronized(orders) {
     				payForOrder(o);
     			}
+    			return true;
     		}
     	}
     	
@@ -147,7 +150,7 @@ public class CashierAgent extends Agent {
     private void payForOrder(Order order) {
     	double payment = order.cost;
     	money -= payment;
-    	print("Paying market " + payment + " for order!");
+    	print("Paying market $" + payment + " for order!");
     	market.msgPayForOrder(order.productIndex, payment);
     	orders.remove(order);
     }

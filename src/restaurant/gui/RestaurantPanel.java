@@ -36,8 +36,8 @@ public class RestaurantPanel extends JPanel {
 
 	//Host, cook, waiters and customers
 	private HostAgent host = new HostAgent("Capt. Krabs", nTables);
-	private CookAgent cook = new CookAgent("Spongebob", restaurant);
 	private CashierAgent cashier = new CashierAgent("Squidward", restaurant);
+	private CookAgent cook = new CookAgent("Spongebob", restaurant, cashier);	
 	private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
 	private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
 	private java.util.List<MarketAgent> markets = new ArrayList<MarketAgent>();
@@ -115,7 +115,7 @@ public class RestaurantPanel extends JPanel {
 		*/
 		// Add all other default agents
 		host.startThread();
-		cook.setCashier(cashier);
+		//cook.setCashier(cashier);
 		cook.startThread();
 		market.setCook(cook);
 		market.startThread();

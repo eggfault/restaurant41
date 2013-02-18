@@ -39,18 +39,22 @@ public class CookAgent extends Agent {
 
     /** Constructor for CookAgent class
      * @param name name of the cook
+     * @param cashier 
      */
-    public CookAgent(String name, Restaurant restaurant) {
+    public CookAgent(String name, Restaurant restaurant, CashierAgent cashier) {
 		super();
 		
 		this.name = name;
 		this.restaurant = restaurant;
+		this.cashier = cashier;
 		
 		orders  = new ArrayList<Order>();
 		deliveries = new ArrayList<Delivery>();
 		// Create the restaurant's inventory.
 		menu = new Menu();
 		inventory = new Inventory(menu, MIN_ITEM_QUANTITY, MAX_ITEM_QUANTITY);
+		// Initial check of stock for low items
+		checkInventoryForLowStock();
     }
     
     /** Private class to store order information.
@@ -221,6 +225,7 @@ public class CookAgent extends Agent {
     	}
     }
     
+    // Unused: replaced by a parameter in CookAgent's constructor as a bugfix for the initial inventory stock check
     public void setCashier(CashierAgent cashier) {
     	this.cashier = cashier;
     }

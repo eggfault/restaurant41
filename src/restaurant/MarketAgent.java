@@ -83,9 +83,10 @@ public class MarketAgent extends Agent {
 		// Find the matching order
 		for(Order o:orders) {
 			if(o.productIndex == productIndex) {
-				System.out.println("found matching order");
 				o.receivedPayment = payment;
 				o.status = OrderStatus.needToDeliver;
+				stateChanged();
+				return;
 			}
 		}
 		stateChanged();
@@ -154,7 +155,7 @@ public class MarketAgent extends Agent {
 
     private void deliverOrder(final Order order) {
 		// Here can be a check to see if cashier gave enough money, but this is not in the v4.1 requirement so I will implement later
-    	print("Received " + order.receivedPayment + " from cashier and now delivering order for " + order.name + " to cook! (" + DELIVERY_TIME + " ms)");
+    	print("Received $" + order.receivedPayment + " from cashier and now delivering order for " + order.name + " to cook! (" + DELIVERY_TIME + " ms)");
     	// Have a delay
     	timer.schedule(new TimerTask() {
 		    public void run() {
