@@ -144,6 +144,8 @@ public class MarketAgent extends Agent {
     	}
     	else {																// none in stock
     		print("Sorry, we do not have any " + order.name + "s in stock!");
+    		// Random replineshment
+    		inventory.addToQuantity(order.name, (int)Math.random()*4);			// MAGIC NUMBER!: 4 is a temporarily a magic number for ordering items that are out of stock
     		order.status = OrderStatus.canceled;			// cancel the order
     	}
     	stateChanged();
@@ -163,7 +165,11 @@ public class MarketAgent extends Agent {
 		    }
 		}, DELIVERY_TIME);
     	*/
+    	// Subtract from inventory
+    	inventory.subtractFromQuantity(order.name, order.deliverQuantity);
+    	// Pocket the money
     	money += order.receivedPayment;
+    	// Deliver the order
     	cook.msgDeliverOrder(order.name, order.deliverQuantity);
     	orders.remove(order);
 	}
