@@ -1,6 +1,7 @@
 package agent;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -108,6 +109,11 @@ public abstract class Agent {
 			goOn = false;
 			this.interrupt();
 		}
+	}
+	
+	protected double cash(double d) {
+	    DecimalFormat dec2 = new DecimalFormat("#.##");
+	    return Double.valueOf(dec2.format(d));
 	}
 }
 

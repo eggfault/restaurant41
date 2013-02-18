@@ -97,7 +97,7 @@ public class CashierAgent extends Agent {
     
     /** Sent by a market after cashier requests an order */
     public void msgHereIsYourOrderInvoice(MarketAgent market, int productIndex, double orderPrice) {
-		print("Received invoice from " + market.getName() + " for a price of $" + orderPrice);
+		print("Received invoice from " + market.getName() + " for a price of $" + cash(orderPrice));
 		// Find the matching order
 		for(Order o:orders) {
 			if(o.productIndex == productIndex) {
@@ -203,7 +203,7 @@ public class CashierAgent extends Agent {
     private void payForOrder(Order order) {
     	double payment = order.cost;
     	money -= payment;
-    	print("Paying market $" + payment + " for order!");
+    	print("Paying market $" + cash(payment) + " for order!");
     	markets.get(order.marketIndex).msgPayForOrder(order.productIndex, payment);
     	orders.remove(order);
     }

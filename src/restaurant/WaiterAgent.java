@@ -54,6 +54,7 @@ public class WaiterAgent extends Agent {
 
     private HostAgent host;
     private CookAgent cook;
+    
 
     //Animation Variables
     AStarTraversal aStar;
@@ -293,9 +294,9 @@ public class WaiterAgent extends Agent {
 		    public void run() {
 		    	print("Done with my break!");
 		    	host.msgIAmDoneWithMyBreak(myself);
-		    	onBreak = false;
 		    }
 		}, BREAK_DURATION);
+    	onBreak = false;
 	}
 
 	/** Seats the customer at a specific table 

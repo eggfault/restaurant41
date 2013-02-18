@@ -119,7 +119,7 @@ public class CustomerAgent extends Agent {
     /** Cashier sends this to give change back to the customer after he has paid for food */
     public void msgHereIsYourChange(double change) {
     	money += change;
-    	print("Received $" + change + " in change. Now I have $" + money);
+    	print("Received $" + change + " in change. Now I have $" + cash(money));
     	events.add(AgentEvent.donePaying);
     	stateChanged();
     }
@@ -254,8 +254,7 @@ public class CustomerAgent extends Agent {
     /** Goes to the restaurant when the customer becomes hungry */
     private void goingToRestaurant() {
     	print("Going to restaurant.");
-    	money = (double)Math.round((Math.random()*(MAX_MONEY-MIN_MONEY) + MIN_MONEY) * 100) / 100;	// gives the customer a random amount of money 
-																									// between the min/max bounds for money and rounds it to .00
+    	money = Math.random()*(MAX_MONEY-MIN_MONEY) + MIN_MONEY;	// gives the customer a random amount of money 
     	guiCustomer.appearInWaitingQueue();
     	// Small chance that customer will leave because the food is too expensive
     	if ((int)(Math.random() * 10) == 0) {
@@ -328,13 +327,13 @@ public class CustomerAgent extends Agent {
     /** When the customer is done eating, he calculates the bill and attempts to pay the cashier */
     private void payCashierForFood() {
     	// Semi-hack to calculate cost of food
-    	print("I have $" + money);
+    	print("I have $" + cash(money));
     	bill = choice.getPrice();				// this is for ONE order only, code must be changed if accomodating multiple orders
     	if(money >= bill) {
 	    	double payment = ((int)bill / 5 + 1) * 5;		// truncates bill to nearest int, uses integer division to divide by 5, adds 1, multiplies by 5
 	    													// this effectively makes the customer pay for the food in bills of 5	    	
 	    	if(money >= payment) {
-		    	print("Paying the cashier $" + payment + " for a bill costing $" + bill);
+		    	print("Paying the cashier $" + cash(payment) + " for a bill costing $" + bill);
 		    	money -= payment;
 	    	}
 	    	else {
@@ -344,7 +343,7 @@ public class CustomerAgent extends Agent {
 	    		payment = money;
 	    		money -= payment;
 	    	}
-	    	print("Now I have $" + money + " left.");
+	    	print("Now I have $" + cash(money) + " left.");
 	    	cashier.msgPayForFood(this, bill, payment);
     	}
 		else {

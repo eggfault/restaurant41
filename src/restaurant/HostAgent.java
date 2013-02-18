@@ -141,6 +141,7 @@ public class HostAgent extends Agent {
 		for(MyWaiter w:waiters) {
 			if(w.wtr == waiter) {
 				synchronized(waiters) {
+					print("Ok, " + w.wtr.getName() + " go back to work now.");
 					w.working = true;
 					return;
 				}
