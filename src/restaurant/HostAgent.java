@@ -170,8 +170,7 @@ public class HostAgent extends Agent {
     	for(MyWaiter w:waiters) {
 			if(w.wantsABreak) {
 				// Waiter wants a break, check if the restaurant is busy
-				// This checks if number of free waiters > number of customers waiting to be seated
-				if(waiters.size() - tables.length > waitList.size()) {
+				if(waiters.size() > waitList.size()) {			// use a more sophisticated check later
 					tellWaiterToTakeABreak(w);
 				}
 				else {

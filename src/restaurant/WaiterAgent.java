@@ -17,6 +17,7 @@ public class WaiterAgent extends Agent {
 
 	// State variables for Waiter
     private boolean onBreak = false;
+    private boolean breakPending = false;
     final private double CHANCE_TO_WANT_A_BREAK = 0.25;
     final private int BREAK_DURATION = 15000;
 
@@ -54,7 +55,6 @@ public class WaiterAgent extends Agent {
 
     private HostAgent host;
     private CookAgent cook;
-    
 
     //Animation Variables
     AStarTraversal aStar;
@@ -196,8 +196,14 @@ public class WaiterAgent extends Agent {
      *              Is the name onBreak right? What should it be?*/
     public void setBreakStatus(boolean state) {
     	if(state) {
-    		print("I have been forced to take a break! (" + BREAK_DURATION + " ms)");
-    		host.msgIAmForcedToTakeABreak(this);
+    		if(customers.size() == 0) {			// this waiter is not working right now
+    			print("I have been forced to take a break! (" + BREAK_DURATION + " ms)");
+	    		host.msgIAmForcedToTakeABreak(this);
+	    	}
+    		else {								// the waiter is serving customer(s) right now
+    			print("I have been forced to take a break but I am busy so I will take it when I am done.");
+    			breakPending = true;
+    		}
     	}
     	else {
     		print("I have been unforced to take a break!");
@@ -427,8 +433,14 @@ public class WaiterAgent extends Agent {
 		customer.food.remove(); //remove the food from table animation
 		host.msgTableIsFree(customer.tableNum);
 		customers.remove(customer);
-		// See if waiter wants to take a break
-		if(Math.random() <= CHANCE_TO_WANT_A_BREAK) {
+		// See if a forced break is pending (and not currently busy)
+		if(customers.size() == 0 && breakPending) {
+			print("I was forced to take a break earlier. I will now take that break. (" + BREAK_DURATION + " ms)");
+			breakPending = false;
+			host.msgIAmForcedToTakeABreak(this);
+		}
+		else if(Math.random() <= CHANCE_TO_WANT_A_BREAK) {	// See if waiter wants to take a break by his own freewill
+			print(host.getName() + ", can I take a break?");
 			host.msgIWantToTakeABreak(this);
 		}
 		stateChanged();
