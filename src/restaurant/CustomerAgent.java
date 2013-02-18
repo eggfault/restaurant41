@@ -304,7 +304,7 @@ public class CustomerAgent extends Agent {
     /** Same as orderFood() but avoids previous choice */
     private void reorderFood() {
     	MenuItem newChoice = menu.getRandomItem();
-		while(newChoice.equals(choice))					// Not the best way to do this, but it works and is temporary
+		while(newChoice.equals(choice))					// Not the best way to do this, but it works and is temporary (eventually should use indicies and mod to select new item)
 			newChoice = menu.getRandomItem();
 		choice = newChoice;
 		print("(Reorder) I will have " + choice.getName());

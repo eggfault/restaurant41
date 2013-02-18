@@ -18,6 +18,7 @@ public class WaiterAgent extends Agent {
 	// State variables for Waiter
     private boolean onBreak = false;
     final private double CHANCE_TO_WANT_A_BREAK = 0.25;
+    final private int BREAK_DURATION = 15000;
 
     // State constants for Customers
     public enum CustomerState 
@@ -90,7 +91,6 @@ public class WaiterAgent extends Agent {
 		MyCustomer c = new MyCustomer(customer, tableNum);
 		c.state = CustomerState.NEED_SEATED;
 		customers.add(c);
-		host.msgIWantToTakeABreak(this);
 		stateChanged();
     }
 
@@ -178,22 +178,37 @@ public class WaiterAgent extends Agent {
 		    }
 		}
     }
+    
+	public void msgYouCanTakeABreak() {
+		onBreak = true;
+		stateChanged();
+	}
 
     /** Sent from GUI to control breaks 
      * @param state true when the waiter should go on break and 
      *              false when the waiter should go off break
      *              Is the name onBreak right? What should it be?*/
     public void setBreakStatus(boolean state) {
+    	if(state) {
+    		print("I have been forced to take a break! (" + BREAK_DURATION + " ms)");
+    		host.msgIAmForcedToTakeABreak(this);
+    	}
+    	else {
+    		print("I have been unforced to take a break!");
+    		host.msgIAmDoneWithMyBreak(this);
+    	}
 		onBreak = state;
 		stateChanged();
     }
 
-
-
     /** Scheduler.  Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
-		//print("in waiter scheduler");
-	
+    	
+    	// Taking a break must be FIRST:
+    	if(onBreak) {
+    		takeABreak();
+    	}
+    	
 		// Runs through the customers for each rule, so 
 		// the waiter doesn't serve only one customer at a time
 		if(!customers.isEmpty()) {
@@ -266,7 +281,18 @@ public class WaiterAgent extends Agent {
 
     // *** ACTIONS ***
     
-    /** Seats the customer at a specific table 
+    private void takeABreak() {
+    	final WaiterAgent myself = this;		// so that run() can access "this"
+    	timer.schedule(new TimerTask() {
+		    public void run() {
+		    	print("Done with my break!");
+		    	host.msgIAmDoneWithMyBreak(myself);
+		    	onBreak = false;
+		    }
+		}, BREAK_DURATION);
+	}
+
+	/** Seats the customer at a specific table 
      * @param customer customer that needs seated */
     private void seatCustomer(MyCustomer customer) {
 		DoSeatCustomer(customer); //animation	
@@ -513,6 +539,5 @@ public class WaiterAgent extends Agent {
     public boolean isOnBreak() {
     	return onBreak;
     }
-
 }
 

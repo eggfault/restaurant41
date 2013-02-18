@@ -195,8 +195,8 @@ public class CookAgent extends Agent {
 					order.status = OrderStatus.done;
 					stateChanged();
 			    }
-			}, 15000);		// uses mapping to find name of the order in inventory and retrieves its cook time
-		}//(int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000)
+			}, (int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000));		// uses mapping to find name of the order in inventory and retrieves its cook time
+		}
 		else {
 			// Out of this item!
 			print("Looks like I am out of " + order.toString() + "!");

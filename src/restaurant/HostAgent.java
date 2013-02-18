@@ -134,6 +134,33 @@ public class HostAgent extends Agent {
 			}
 		}
 	}
+	
+	/** Sent by the waiter when he is done with his break */
+	public void msgIAmDoneWithMyBreak(WaiterAgent waiter) {
+		// Find the matching waiter
+		for(MyWaiter w:waiters) {
+			if(w.wtr == waiter) {
+				synchronized(waiters) {
+					w.working = true;
+					return;
+				}
+			}
+		}		
+	}
+	
+	/** Sent by the waiter if he is forced to take a break via the GUI */
+	public void msgIAmForcedToTakeABreak(WaiterAgent waiter) {
+		// Find the matching waiter
+		for(MyWaiter w:waiters) {
+			if(w.wtr == waiter) {
+				synchronized(waiters) {
+					print("Well " + w.wtr.getName() + ", if it is the will of The User, then you shall take a break.");
+					w.working = false;
+					return;
+				}
+			}
+		}		
+	}
     
     // *** SCHEDULER ***
     /** Determine what action is called for, and do it. */
@@ -154,14 +181,14 @@ public class HostAgent extends Agent {
     	
 		if(!waitList.isEmpty() && !waiters.isEmpty()) {
 			synchronized(waiters) {
-				//Finds the next waiter that is working
+				// Finds the next waiter that is working
 				while(!waiters.get(nextWaiter).working) {
 				    nextWaiter = (nextWaiter + 1) % waiters.size();
 				}
 		    }
 		    print("Picking waiter number:" + nextWaiter);
-		    //Then runs through the tables and finds the first unoccupied 
-		    //table and tells the waiter to sit the first customer at that table
+		    // Then runs through the tables and finds the first unoccupied 
+		    // table and tells the waiter to sit the first customer at that table
 		    for(int i=0; i < nTables; i++) {
 				if(!tables[i].occupied) {
 				    synchronized(waitList) {
@@ -228,11 +255,13 @@ public class HostAgent extends Agent {
     
     public void tellWaiterToTakeABreak(MyWaiter waiter) {
     	print("Ok " + waiter.wtr.getName() + ", you can take a break.");
+    	waiter.wtr.msgYouCanTakeABreak();
+    	waiter.working = false;
     	waiter.wantsABreak = false;
     }
     
     public void denyWaiterABreak(MyWaiter waiter) {
-    	print("No, " + waiter.wtr.getName() + " we need you right now. Keep working.");
+    	print("No, " + waiter.wtr.getName() + ", we need you right now. Keep working.");
     	waiter.wantsABreak = false;
     }
     
