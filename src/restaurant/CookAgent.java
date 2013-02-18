@@ -14,10 +14,13 @@ import java.awt.Color;
  *  Interacts with waiters only.
  */
 public class CookAgent extends Agent {
-
+	// Constants
+    final private int MIN_ITEM_QUANTITY = 2;
+    final private int MAX_ITEM_QUANTITY = 5;
+	
     // List of all the orders
-    private List<Order> orders = new ArrayList<Order>();
-    private Map<String,FoodData> inventory = new HashMap<String,FoodData>();
+    private List<Order> orders;
+    private Inventory inventory;
     public enum Status {pending, cooking, done}; // order status
 
     // Name of the cook
@@ -26,48 +29,21 @@ public class CookAgent extends Agent {
     // Timer for simulation
     Timer timer = new Timer();
     Restaurant restaurant; //Gui layout
-    
-    // Constants
-    final private int MIN_ITEM_QUANTITY = 2;
-    final private int MAX_ITEM_QUANTITY = 5;
 
     /** Constructor for CookAgent class
      * @param name name of the cook
      */
     public CookAgent(String name, Restaurant restaurant) {
 		super();
-	
+		
 		this.name = name;
 		this.restaurant = restaurant;
+		orders  = new ArrayList<Order>();
 		// Create the restaurant's inventory.
 		Menu menu = new Menu();
-		for(int i = 0; i < menu.getLength(); i ++)
-		{
-			String itemName = menu.itemAtIndex(i).getName();
-			int itemQuantity = (int)(Math.random()*(MAX_ITEM_QUANTITY-MIN_ITEM_QUANTITY))+MIN_ITEM_QUANTITY;
-			inventory.put(itemName, new FoodData(itemName, itemQuantity));
-		}
-		/*
-		// old way of filling up inventory
-		inventory.put("Steak", new FoodData("Steak", 5));
-		inventory.put("Chicken", new FoodData("Chicken", 4));
-		inventory.put("Pizza", new FoodData("Pizza", 3));
-		inventory.put("Salad", new FoodData("Salad", 2));
-		*/
+		inventory = new Inventory(menu, MIN_ITEM_QUANTITY, MAX_ITEM_QUANTITY);
     }
-    /** Private class to store information about food.
-     *  Contains the food type, its cooking time, and ...
-     */
-    private class FoodData {
-		String type; //kind of food
-		double cookTime;
-		// other things ...
-		
-		public FoodData(String type, double cookTime){
-		    this.type = type;
-		    this.cookTime = cookTime;
-		}
-    }
+    
     /** Private class to store order information.
      *  Contains the waiter, table number, food item,
      *  cooktime and status.
@@ -108,7 +84,6 @@ public class CookAgent extends Agent {
 		orders.add(new Order(waiter, tableNum, choice));
 		stateChanged();
     }
-
 
     /** Scheduler.  Determine what action is called for, and do it. */
     protected boolean pickAndExecuteAnAction() {
@@ -159,8 +134,8 @@ public class CookAgent extends Agent {
 
     private void DoCooking(final Order order) {
 		print("Cooking: " + order + " for table:" + (order.tableNum+1));
-		//put it on the grill. gui stuff
-		order.food = new Food(order.choice.getName().substring(0,2),new Color(0,255,255), restaurant);
+		// put it on the grill. gui stuff
+		order.food = new Food(order.choice.getName().substring(0,2), new Color(0,255,255), restaurant);
 		order.food.cookFood();
 	
 		timer.schedule(new TimerTask() {
@@ -168,7 +143,7 @@ public class CookAgent extends Agent {
 				order.status = Status.done;
 				stateChanged();
 		    }
-		}, (int)(inventory.get(order.choice.getName()).cookTime*1000));
+		}, (int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000));		// uses mapping to find name of the order in inventory and retrieves its cook time
     }
     
     public void DoPlacement(Order order) {

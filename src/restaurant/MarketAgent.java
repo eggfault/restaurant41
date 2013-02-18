@@ -9,25 +9,19 @@ import restaurant.layoutGUI.*;
  *  Only interacts directly with the cashier.
  */
 public class MarketAgent extends Agent {
-	public enum Status {requesting, pending, done}; // transaction status
+	// Constants
+	final private int MIN_ITEM_QUANTITY = 0;
+    final private int MAX_ITEM_QUANTITY = 5;
 	
-    // Name of the market
-    private String name;
-    
-    // Cashier who places the orders
-    private CashierAgent cashier;
-    
-    // Menu
-    private Menu menu;
-    
-    // List of all the orders
-    private List<Order> orders = new ArrayList<Order>();
-    
-    // Amount of money the market has (this is not actually used for anything, but the money is still tracked)
-    private int money;
-
-    // Timer for simulation
-    Timer timer = new Timer();
+	public enum Status {requesting, pending, done}; 		// transaction status
+    private String name;									// name of the market
+    private CashierAgent cashier;							// cashier who places the orders
+    private Menu menu;										// market's copy of the menu
+    private List<Order> orders;								// list of all the orders
+    private Inventory inventory;							// inventory of all MenuItems
+    private int money;										// Amount of money the market has
+    														// (this is not actually used for anything, but the money is still tracked)
+    Timer timer = new Timer();								// timer for simulations
 
     /** Constructor for CashierAgent class
      * @param name name of the cashier
@@ -37,12 +31,16 @@ public class MarketAgent extends Agent {
 	
 		this.name = name;
 		this.cashier = cashier;
-		this.menu = new Menu();
+		
+		menu = new Menu();
+		orders = new ArrayList<Order>();
+		inventory = new Inventory(menu, MIN_ITEM_QUANTITY, MAX_ITEM_QUANTITY);
 		
 		money = 0;			// market will start with $0 (it won't spend any money, just collect it)
     }
     
     private class Order {
+    	public String name;
 		public CashierAgent cashier;
 		public int productIndex;
 		public int quantity;
@@ -57,7 +55,9 @@ public class MarketAgent extends Agent {
 		    this.cashier = cashier;
 		    this.quantity = quantity;
 		    this.productIndex = productIndex;
-		    this.status = Status.pending;
+		    
+		    status = Status.requesting;
+		    name = menu.itemAtIndex(productIndex).getName();
 		    
 		    // Product availablity is currently hardcoded
 		    // code
@@ -77,8 +77,15 @@ public class MarketAgent extends Agent {
     protected boolean pickAndExecuteAnAction() {
     	
     	for(Order o:orders) {
-		    if(o.status == Status.pending) {
-				processOrder(o);
+		    if(o.status == Status.requesting) {
+				calculateOrder(o);
+				return true;
+		    }
+		}
+    	
+    	for(Order o:orders) {
+		    if(o.status == Status.requesting) {
+				calculateOrder(o);
 				return true;
 		    }
 		}
@@ -88,11 +95,23 @@ public class MarketAgent extends Agent {
     
     // *** ACTIONS ***
     
-    private void processOrder(Order order) {
-    	System.out.println("Order processed: " + order.quantity + " orders of " + menu.itemAtIndex(order.productIndex).getName());
-    	// Add a delay here eventually...
-    	orders.remove(order);
-    	
+    private void calculateOrder(Order order) {
+    	print("Order requested: " + order.quantity + " orders of " + order.name);
+    	int myQuantity = inventory.getQuantity(order.name);
+    	// Check if the market has any of the request product in stock
+    	if(myQuantity >= order.quantity) {			// enough in stock to completely fulfill the request
+    		print("We can provide " + order.quantity + " " + order.name + "s because we have " + myQuantity + " of them in stock!");
+    		//order.cashier.msgHereIsYourOrderInvoice();
+    		order.status = Status.pending;
+    	}
+    	else if(myQuantity > 0) {					// not enough to fulfill request but more than 0
+    		print("We do not have " + order.quantity + " " + order.name + "s but we do have " + inventory.getQuantity(order.name) + " of them!");
+    		order.status = Status.pending;
+    	}
+    	else {																// none in stock
+    		print("Sorry, we do not have any " + order.name + "s in stock!");
+    		orders.remove(order);			// cancel the order
+    	}
 	}
 
     // *** EXTRA ***

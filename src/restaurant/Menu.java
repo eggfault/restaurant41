@@ -2,14 +2,19 @@ package restaurant;
 
 
 public class Menu {
+	/** The actual menu of items itself */
     private MenuItem choices[] = new MenuItem[]
 	{
-		new MenuItem("Steak", 15.99),
-		new MenuItem("Chicken", 10.99), 
-		new MenuItem("Salad", 5.99),
-		new MenuItem("Pizza", 8.99),
+    	// name, price, cookTime
+		new MenuItem("Steak", 15.99, 5),
+		new MenuItem("Chicken", 10.99, 4), 
+		new MenuItem("Salad", 5.99, 2),
+		new MenuItem("Pizza", 8.99, 3),
     };
     
+    public Menu(){}
+    
+    /** Returns a random MenuItem from choices[] (used for when the customer randomly picks something to order */
     public MenuItem getRandomItem()
     {
     	return choices[(int)(Math.random()*choices.length)];
@@ -21,6 +26,7 @@ public class Menu {
     	return choices.length;
     }
     
+    /** Returns the MenuItem at the specified index in choices[] */
     public MenuItem itemAtIndex(int index)
     {
     	return choices[index];
@@ -34,7 +40,7 @@ public class Menu {
     			return choices[i];
     	// Not found: this should NEVER happen if the market code is correct!
     	System.out.println("ERROR: " + searchString + " not found in Menu!");
-    	return new MenuItem("ERROR!", 0.00);
+    	return new MenuItem("ERROR!", 0.00, 0);
     }
 }
     
