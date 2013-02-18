@@ -149,6 +149,7 @@ public class CookAgent extends Agent {
     private void processDelivery(Delivery delivery) {
     	print("Received " + delivery.quantity + " of " + delivery.productName + " from the market!");
     	inventory.addToQuantity(delivery.productName, delivery.quantity);
+    	inventory.setOrdered(delivery.productName, false);		// open this item up for re-ordering if it runs low again
 		deliveries.remove(delivery);
 	}
 
@@ -190,8 +191,8 @@ public class CookAgent extends Agent {
 					order.status = OrderStatus.done;
 					stateChanged();
 			    }
-			}, (int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000));		// uses mapping to find name of the order in inventory and retrieves its cook time
-		}
+			}, 15000);		// uses mapping to find name of the order in inventory and retrieves its cook time
+		}//(int)(inventory.getProduct(order.choice.getName()).getCookTime()*1000)
 		else {
 			// Out of this item!
 			print("Looks like I am out of " + order.toString() + "!");
@@ -209,9 +210,10 @@ public class CookAgent extends Agent {
     	print("Checking inventory for low stock...");
     	for(int i = 0; i < menu.getLength(); i ++) {
     		String menuItemName = menu.itemAtIndex(i).getName();
-    		if(inventory.getQuantity(menuItemName) <= LOW_STOCK) {
-    			cashier.msgOrderMoreOf(i, STOCK_ORDER_QUANTITY);
+    		if(inventory.getQuantity(menuItemName) <= LOW_STOCK && !inventory.alreadyOrdered(menuItemName)) {
     			print(cashier.getName() + ", please order some more " + menuItemName);
+    			cashier.msgOrderMoreOf(i, STOCK_ORDER_QUANTITY);
+    			inventory.setOrdered(menuItemName, true);
     		}
     	}
     }

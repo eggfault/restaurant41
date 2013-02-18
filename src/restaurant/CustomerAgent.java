@@ -241,7 +241,7 @@ public class CustomerAgent extends Agent {
 		print("Deciding menu choice...(3000 milliseconds)");
 		timer.schedule(new TimerTask() {
 		    public void run() {  
-			msgDecided();	    
+		    	msgDecided();	    
 		    }
 		}, 3000);//how long to wait before running task
 		stateChanged();

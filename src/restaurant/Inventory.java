@@ -10,10 +10,13 @@ public class Inventory {
 	private class Stock {
 		public MenuItem product;
 		public int quantity;
+		public boolean ordered;		// flag used by cook only to indicate that a food has already been ordered
+									// this is to prevent the cook from continuously ordering for something that is missing
 		
 		public Stock(MenuItem product, int quantity) {
 			this.product = product;
 			this.quantity = quantity;
+			ordered = false;
 		}
 	}
 	
@@ -46,6 +49,15 @@ public class Inventory {
 	/** Adds specified amount to quantity of item */
 	public void addToQuantity(String name, int amount) {
 		contents.get(name).quantity += amount;
+	}
+	
+	/** Sets the ordered flag (refer to comments above in Stock class) */
+	public void setOrdered(String name, boolean ordered) {
+		contents.get(name).ordered = ordered;
+	}
+	
+	public boolean alreadyOrdered(String name) {
+		return contents.get(name).ordered;
 	}
 	
 	public int size() {

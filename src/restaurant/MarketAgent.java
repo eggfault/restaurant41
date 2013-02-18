@@ -1,8 +1,9 @@
 package restaurant;
 
 import agent.Agent;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.*;
-
 import restaurant.CashierAgent.OrderStatus;
 import restaurant.layoutGUI.*;
 
@@ -14,7 +15,7 @@ public class MarketAgent extends Agent {
 	// Constants
 	final private int MIN_ITEM_QUANTITY = 0;
     final private int MAX_ITEM_QUANTITY = 10;
-    final private int DELIVERY_TIME = 150000;
+    final private int DELIVERY_TIME = 15000;
 	
 	public enum OrderStatus {requesting, waitingForPayment, needToDeliver, canceled};
     private String name;									// name of the market
@@ -157,18 +158,16 @@ public class MarketAgent extends Agent {
     	// Have a delay
     	timer.schedule(new TimerTask() {
 		    public void run() {
+		    	// Subtract from inventory
+		    	inventory.subtractFromQuantity(order.name, order.deliverQuantity);
+		    	// Pocket the money
 		    	money += order.receivedPayment;
+		    	// Deliver the order
 		    	cook.msgDeliverOrder(order.name, order.deliverQuantity);
-		    	orders.remove(order);
+		    	
 		    }
 		}, DELIVERY_TIME);
-
-    	// Subtract from inventory
-    	inventory.subtractFromQuantity(order.name, order.deliverQuantity);
-    	// Pocket the money
-    	money += order.receivedPayment;
-    	// Deliver the order
-    	cook.msgDeliverOrder(order.name, order.deliverQuantity);
+    	// Remove order
     	orders.remove(order);
 	}
 	
