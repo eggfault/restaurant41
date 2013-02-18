@@ -89,9 +89,11 @@ public class CookAgent extends Agent {
     /** Represents a delivery from the market for food ordered by the cashier */
     private class Delivery {
     	public String productName;
+    	public String marketName;
     	public int quantity;
     	
-    	public Delivery(String productName, int deliverQuantity) {
+    	public Delivery(String marketName, String productName, int deliverQuantity) {
+    		this.marketName = marketName;
 			this.productName = productName;
 			this.quantity = deliverQuantity;
 		}
@@ -110,8 +112,8 @@ public class CookAgent extends Agent {
     }
     
     /** Message from the market to deliver the food ordered by the cashier */
-	public void msgDeliverOrder(String productName, int deliverQuantity) {
-		deliveries.add(new Delivery(productName, deliverQuantity));
+	public void msgDeliverOrder(String marketName, String productName, int deliverQuantity) {
+		deliveries.add(new Delivery(marketName, productName, deliverQuantity));
 		stateChanged();
 	}
 
@@ -151,7 +153,7 @@ public class CookAgent extends Agent {
     // *** ACTIONS ***
     
     private void processDelivery(Delivery delivery) {
-    	print("Received " + delivery.quantity + " of " + delivery.productName + " from the market!");
+    	print("Received " + delivery.quantity + " of " + delivery.productName + " from " + delivery.marketName + "!");
     	inventory.addToQuantity(delivery.productName, delivery.quantity);
     	inventory.setOrdered(delivery.productName, false);		// open this item up for re-ordering if it runs low again
 		deliveries.remove(delivery);

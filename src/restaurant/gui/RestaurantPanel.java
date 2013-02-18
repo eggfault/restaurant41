@@ -41,7 +41,7 @@ public class RestaurantPanel extends JPanel {
 	private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
 	private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
 	private java.util.List<MarketAgent> markets = new ArrayList<MarketAgent>();
-	private MarketAgent market = new MarketAgent("Market");
+	//private MarketAgent market = new MarketAgent("Market");
 
 	private JPanel restLabel = new JPanel();
 	private ListPanel customerPanel = new ListPanel(this, "Customers");
@@ -104,22 +104,20 @@ public class RestaurantPanel extends JPanel {
 		restaurant.setAnimDelay(500);
 		restaurant.displayRestaurant();
 		
+		// Add all default agents
+		host.startThread();
+		//cook.setCashier(cashier);
 		// Add market agents
-		// This is currently unused in v4.1
-		/*
 		for(int i = 0; i < NUMBER_OF_MARKETS; i ++) {
-			MarketAgent newMarket = new MarketAgent("Market " + (char)((int)'A' + i), cashier);
+			MarketAgent newMarket = new MarketAgent("Market " + (char)((int)'A' + i));
+			newMarket.setCook(cook);
 			newMarket.startThread();
 			markets.add(newMarket);
 		}
-		*/
-		// Add all other default agents
-		host.startThread();
-		//cook.setCashier(cashier);
+		//market.setCook(cook);
+		//market.startThread();
 		cook.startThread();
-		market.setCook(cook);
-		market.startThread();
-		cashier.setMarket(market);
+		cashier.setMarkets(markets);
 		cashier.startThread();
 
 		setLayout(new GridLayout(1,2, 20,20));

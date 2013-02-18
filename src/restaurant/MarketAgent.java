@@ -133,21 +133,22 @@ public class MarketAgent extends Agent {
     		// Calculate invoice
     		// Market price will be 1/3 to 1/2 of the menu price
     		order.myMarketPrice = 1/(Math.random() + 2)*menu.itemAtIndex(order.productIndex).getPrice();
-    		order.cashier.msgHereIsYourOrderInvoice(order.productIndex, order.myMarketPrice*order.quantity);
+    		order.cashier.msgHereIsYourOrderInvoice(this, order.productIndex, order.myMarketPrice*order.quantity);
     		order.deliverQuantity = order.quantity;
     		order.status = OrderStatus.waitingForPayment;
     	}
     	else if(myQuantity > 0) {					// not enough to fulfill request but more than 0
     		print("We do not have " + order.quantity + " " + order.name + "s but we do have " + inventory.getQuantity(order.name) + " of them!");
     		order.myMarketPrice = 1/(Math.random() + 2)*menu.itemAtIndex(order.productIndex).getPrice();
-    		order.cashier.msgHereIsYourOrderInvoice(order.productIndex, order.myMarketPrice*myQuantity);
+    		order.cashier.msgHereIsYourOrderInvoice(this, order.productIndex, order.myMarketPrice*myQuantity);
     		order.deliverQuantity = myQuantity;			// only deliver what the market can provide at this exact time
     		order.status = OrderStatus.waitingForPayment;
     	}
     	else {																// none in stock
     		print("Sorry, we do not have any " + order.name + "s in stock!");
+    		order.cashier.msgOutOfStock(this, order.productIndex);
     		// Random replineshment
-    		inventory.addToQuantity(order.name, (int)Math.random()*5);			// MAGIC NUMBER!: 4 is a temporarily a magic number for ordering items that are out of stock
+    		inventory.addToQuantity(order.name, 3);			// MAGIC NUMBER!: 3 is a temporarily a magic number for ordering items that are out of stock
     		order.status = OrderStatus.canceled;			// cancel the order
     	}
     	stateChanged();
@@ -164,7 +165,7 @@ public class MarketAgent extends Agent {
 		    	// Pocket the money
 		    	money += order.receivedPayment;
 		    	// Deliver the order
-		    	cook.msgDeliverOrder(order.name, order.deliverQuantity);
+		    	cook.msgDeliverOrder(name, order.name, order.deliverQuantity);
 		    }
 		}, DELIVERY_TIME);
     	// Remove order
