@@ -88,11 +88,16 @@ public class CustomerAgent extends Agent {
     }
     /** Waiter sends this message to take the customer's order */
     public void msgDecided(){
-	events.add(AgentEvent.decidedChoice);
-	stateChanged(); 
+		events.add(AgentEvent.decidedChoice);
+		stateChanged(); 
     }
     /** Waiter sends this message to take the customer's order */
     public void msgWhatWouldYouLike() {
+		events.add(AgentEvent.waiterToTakeOrder);
+		stateChanged(); 
+    }
+    /** Waiter sends this message to retake the customer's order */
+    public void msgPleaseReorder() {
 		events.add(AgentEvent.waiterToTakeOrder);
 		stateChanged(); 
     }
@@ -160,44 +165,49 @@ public class CustomerAgent extends Agent {
 		}
 		if (state == AgentState.SeatedWithMenu) {
 		    if (event == AgentEvent.decidedChoice)	{
-			readyToOrder();
-			state = AgentState.WaiterImReadyToOrder;
-			return true;
+				readyToOrder();
+				state = AgentState.WaiterImReadyToOrder;
+				return true;
 		    }
 		}
 		if (state == AgentState.WaiterImReadyToOrder) {
 		    if (event == AgentEvent.waiterToTakeOrder)	{
-			orderFood();
-			state = AgentState.WaitingForFood;
-			return true;
+				orderFood();
+				state = AgentState.WaitingForFood;
+				return true;
 		    }
 		}
 		if (state == AgentState.WaitingForFood) {
-		    if (event == AgentEvent.foodDelivered)	{
-			eatFood();
-			state = AgentState.Eating;
-			return true;
+		    if (event == AgentEvent.foodDelivered) {
+				eatFood();
+				state = AgentState.Eating;
+				return true;
+		    }
+		    else if(event == AgentEvent.waiterToTakeOrder) {
+		    	reorderFood();
+		    	state = AgentState.WaitingForFood;
+		    	return true;
 		    }
 		}
 		if (state == AgentState.Eating) {
 		    if (event == AgentEvent.doneEating)	{
-		    readyToPay();
-		    state = AgentState.WaiterImReadyToPay;
-			return true;
+			    readyToPay();
+			    state = AgentState.WaiterImReadyToPay;
+				return true;
 		    }
 		}
 		if (state == AgentState.WaiterImReadyToPay) {
 		    if (event == AgentEvent.waiterToGiveBill) {
-		    payCashierForFood();
-		    state = AgentState.PayingForFood;
-			return true;
+			    payCashierForFood();
+			    state = AgentState.PayingForFood;
+				return true;
 		    }
 		}
 		if (state == AgentState.PayingForFood) {
 		    if (event == AgentEvent.donePaying) {
-		    leaveRestaurantAfterEating();
-		    state = AgentState.DoingNothing;
-			return true;
+			    leaveRestaurantAfterEating();
+			    state = AgentState.DoingNothing;
+				return true;
 		    }
 		}
 	
@@ -264,7 +274,18 @@ public class CustomerAgent extends Agent {
     /** Picks a random choice from the menu and sends it to the waiter */
     private void orderFood() {
 		choice = menu.getRandomItem();
-		print("Ordering the " + choice.getName());
+		print("I will have " + choice.getName());
+		waiter.msgHereIsMyChoice(this, choice);
+		stateChanged();
+    }
+    
+    /** Same as orderFood() but avoids previous choice */
+    private void reorderFood() {
+    	MenuItem newChoice = menu.getRandomItem();
+		while(newChoice.equals(choice))					// Not the best way to do this, but it works and is temporary
+			newChoice = menu.getRandomItem();
+		choice = newChoice;
+		print("(Reorder) I will have " + choice.getName());
 		waiter.msgHereIsMyChoice(this, choice);
 		stateChanged();
     }

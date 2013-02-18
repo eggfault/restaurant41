@@ -21,7 +21,7 @@ public class WaiterAgent extends Agent {
     //State constants for Customers
 
     public enum CustomerState 
-	{NEED_SEATED, READY_TO_ORDER, ORDER_PENDING, ORDER_READY, IS_DONE, NO_ACTION, READY_TO_PAY};
+	{NEED_SEATED, READY_TO_ORDER, ORDER_PENDING, ORDER_READY, IS_DONE, NO_ACTION, READY_TO_PAY, REORDER};
 
     Timer timer = new Timer();
 
@@ -143,6 +143,7 @@ public class WaiterAgent extends Agent {
      * @param tableNum identification number of table whose food is ready
      * @param f is the guiFood object */
     public void msgOrderIsReady(int tableNum, Food f) {
+    	// Find the right customer, searching by table
 		for(MyCustomer c:customers) {
 		    if(c.tableNum == tableNum) {
 				c.state = CustomerState.ORDER_READY;
@@ -152,6 +153,19 @@ public class WaiterAgent extends Agent {
 		    }
 		}
     }
+    
+    /** Sent by cook to indicate the requested order is out of stock.
+     * Waiter needs to tell customer to reorder */
+    public void msgOutOfStock(int tableNum) {
+    	// Find the right customer, searching by table
+		for(MyCustomer c:customers) {
+			if(c.tableNum == tableNum) {
+				c.state = CustomerState.REORDER;
+				stateChanged();
+				return;
+			}
+		}
+	}
 
     /** Customer sends this when they are done eating.
      * @param customer customer who is leaving the restaurant. */
@@ -188,6 +202,13 @@ public class WaiterAgent extends Agent {
 		    for(MyCustomer c:customers) {
 				if(c.state == CustomerState.ORDER_READY) {
 				    giveFoodToCustomer(c);
+				    return true;
+				}
+		    }
+		    // Will tell customer to reorder
+		    for(MyCustomer c:customers) {
+				if(c.state == CustomerState.REORDER) {
+				    tellCustomerToReorder(c);
 				    return true;
 				}
 		    }
@@ -248,10 +269,10 @@ public class WaiterAgent extends Agent {
     /** Seats the customer at a specific table 
      * @param customer customer that needs seated */
     private void seatCustomer(MyCustomer customer) {
-	DoSeatCustomer(customer); //animation	
-	customer.state = CustomerState.NO_ACTION;
-	customer.cmr.msgFollowMeToTable(this, new Menu());
-	stateChanged();
+		DoSeatCustomer(customer); //animation	
+		customer.state = CustomerState.NO_ACTION;
+		customer.cmr.msgFollowMeToTable(this, new Menu());
+		stateChanged();
     }
     
     /** Takes down the customers order 
@@ -261,6 +282,13 @@ public class WaiterAgent extends Agent {
 		customer.state = CustomerState.NO_ACTION;
 		customer.cmr.msgWhatWouldYouLike();
 		stateChanged();
+    }
+    
+    private void tellCustomerToReorder(MyCustomer customer) {
+    	print(customer.cmr.getName() + ": Sorry, we are out of your order! Please reorder and call me when you are ready again.");
+    	customer.state = CustomerState.NO_ACTION;
+    	customer.cmr.msgPleaseReorder();
+    	stateChanged();
     }
 
     /** Gives the customer his or her bill
@@ -458,28 +486,28 @@ public class WaiterAgent extends Agent {
     // *** EXTRA ***
 
     /** @return name of waiter */
-    public String getName(){
+    public String getName() {
         return name;
     }
 
     /** @return string representation of waiter */
-    public String toString(){
-	return "waiter " + getName();
+    public String toString() {
+    	return "waiter " + getName();
     }
     
     /** Hack to set the cook for the waiter */
-    public void setCook(CookAgent cook){
-	this.cook = cook;
+    public void setCook(CookAgent cook) {
+    	this.cook = cook;
     }
     
     /** Hack to set the host for the waiter */
-    public void setHost(HostAgent host){
-	this.host = host;
+    public void setHost(HostAgent host) {
+    	this.host = host;
     }
 
     /** @return true if the waiter is on break, false otherwise */
-    public boolean isOnBreak(){
-	return onBreak;
+    public boolean isOnBreak() {
+    	return onBreak;
     }
 
 }

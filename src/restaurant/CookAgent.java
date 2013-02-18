@@ -16,7 +16,7 @@ import java.awt.Color;
 public class CookAgent extends Agent {
 	// Constants
     final private int MIN_ITEM_QUANTITY = 3;
-    final private int MAX_ITEM_QUANTITY = 5;
+    final private int MAX_ITEM_QUANTITY = 6;
     final private int LOW_STOCK = 4;				// when the stock is <= LOW_STOCK, an order for more will be placed
     final private int STOCK_ORDER_QUANTITY = 3;		// how many more of an item to place in an order when it runs low
 	
@@ -196,6 +196,8 @@ public class CookAgent extends Agent {
 		else {
 			// Out of this item!
 			print("Looks like I am out of " + order.toString() + "!");
+			// Tell waiter the food is out of stock (note: this is for if the customer orders 1 item only, as required in v4.1)
+			order.waiter.msgOutOfStock(order.tableNum);
 		}
 		// Now check the inventory to see if anything is running low
 		checkInventoryForLowStock();
@@ -211,6 +213,7 @@ public class CookAgent extends Agent {
     	for(int i = 0; i < menu.getLength(); i ++) {
     		String menuItemName = menu.itemAtIndex(i).getName();
     		if(inventory.getQuantity(menuItemName) <= LOW_STOCK && !inventory.alreadyOrdered(menuItemName)) {
+    			// Order more of this item!
     			print(cashier.getName() + ", please order some more " + menuItemName);
     			cashier.msgOrderMoreOf(i, STOCK_ORDER_QUANTITY);
     			inventory.setOrdered(menuItemName, true);
