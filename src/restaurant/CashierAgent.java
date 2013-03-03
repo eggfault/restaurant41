@@ -4,13 +4,14 @@ import agent.Agent;
 import java.util.*;
 
 import restaurant.CookAgent.OrderStatus;
+import restaurant.interfaces.Customer;
 import restaurant.layoutGUI.*;
 
 /** Cashier agent for restaurant.
  *  Collects money from customers.
  *  Handles ordering food from market.
  */
-public class CashierAgent extends Agent {
+public class CashierAgent extends Agent{
 	public enum TransactionStatus {pending, failedToPay}; 			// transaction status
 	public enum OrderStatus {pending, requested, needToPay, reorder};	// order status
 	
@@ -40,7 +41,7 @@ public class CashierAgent extends Agent {
     }
     
     private class Transaction {
-		public CustomerAgent customer;
+		public Customer customer;
 		public double bill;
 		public double payment;
 		public TransactionStatus status;
@@ -50,7 +51,7 @@ public class CashierAgent extends Agent {
 		 * @param bill the customer's bill
 		 * @param payment the amount of money the customer paid 
 		 */
-		public Transaction(CustomerAgent customer, double bill, double payment, TransactionStatus status) {
+		public Transaction(Customer customer, double bill, double payment, TransactionStatus status) {
 		    this.customer = customer;
 		    this.bill = bill;
 		    this.payment = payment;
@@ -77,7 +78,7 @@ public class CashierAgent extends Agent {
     // *** MESSAGES ***
     /** Customer sends this when he is ready to pay.
      * @param customer customer who is paying the cashier. */
-    public void msgPayForFood(CustomerAgent customer, double bill, double payment) {
+    public void msgPayForFood(Customer customer, double bill, double payment) {
     	transactions.add(new Transaction(customer, bill, payment, TransactionStatus.pending));
     	stateChanged();
     }

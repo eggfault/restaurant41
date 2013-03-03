@@ -1,6 +1,7 @@
 package restaurant;
 
 import restaurant.gui.RestaurantGui;
+import restaurant.interfaces.Customer;
 import restaurant.layoutGUI.*;
 import agent.Agent;
 import java.util.*;
@@ -11,7 +12,7 @@ import java.awt.Color;
  * Randomly chooses a menu item and simulates eating 
  * when the food arrives. 
  * Interacts with a waiter only */
-public class CustomerAgent extends Agent {
+public class CustomerAgent extends Agent implements Customer {
     private String name;
     private int UID;				// Unique ID; this is currently unused (16 Feb 2013, 7:06 PM).
     private int hungerLevel = 5;  	// Determines length of meal
@@ -90,7 +91,7 @@ public class CustomerAgent extends Agent {
 		stateChanged();
     }
     /** Waiter sends this message to take the customer's order */
-    public void msgDecided(){
+    public void msgDecided() {
 		events.add(AgentEvent.decidedChoice);
 		stateChanged(); 
     }

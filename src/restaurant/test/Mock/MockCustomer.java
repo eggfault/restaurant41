@@ -3,10 +3,10 @@
  */
 package restaurant.test.Mock;
 
-import restaurant.CustomerAgent.AgentEvent;
-import restaurant.interfaces.Cook;
+import restaurant.Menu;
+import restaurant.MenuItem;
+import restaurant.WaiterAgent;
 import restaurant.interfaces.Customer;
-import restaurant.interfaces.Waiter;
 
 public class MockCustomer extends MockAgent implements Customer {
 	private boolean hasEnoughMoney;
@@ -31,5 +31,59 @@ public class MockCustomer extends MockAgent implements Customer {
     public void makePoor() {
     	hasEnoughMoney = false;
     }
+
+	@Override
+	public void msgFollowMeToTable(WaiterAgent waiter, Menu menu) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgDecided() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgWhatWouldYouLike() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgPleaseReorder() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgHereIsYourFood(MenuItem choice) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgDoneEating() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgHereIsYourChange(double change) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgGoWashDishes() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void msgWouldYouLikeToWait() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
