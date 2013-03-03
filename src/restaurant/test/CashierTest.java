@@ -47,6 +47,49 @@ public class CashierTest extends TestCase {
 	}
 	
 	/**
+	 * This tests the regular routine of 2 customers with
+	 * enough money paying for his or her own meals. The
+	 * cashier should give customer1 his change first, then
+	 * give customer2 his change (FIFO).
+	 */
+	@Test
+	public void testMsgPayForFoodMultiple() {
+		// Create a new cashier agent
+		CashierAgent cashier = new CashierAgent("Cashier1",null);
+		
+		// Create 2 mock customers
+		MockCustomer customer1 = new MockCustomer("Customer1");
+		MockCustomer customer2 = new MockCustomer("Customer2");
+		
+		// customer1 pays the cashier $10.00 for a bill worth $8.00
+		cashier.msgPayForFood(customer1, 8.00, 10.00);
+		
+		// customer2 pays the cashier $7.00 for a bill worth $6.25
+		cashier.msgPayForFood(customer2, 6.25, 7.00);
+		
+		// Check for firing of actions from message handler
+		assertEquals("customer1 should have an empty event log before the Cashier's scheduler is called. " +
+			"Instead, the customer1's event log reads: " + customer1.log.toString(), 0, customer1.log.size());
+		assertEquals("customer2 should have an empty event log before the Cashier's scheduler is called. " +
+			"Instead, the customer2's event log reads: " + customer2.log.toString(), 0, customer2.log.size());
+		
+		cashier.pickAndExecuteAnAction();
+		
+		// Only customer1 should have received msgHereIsYourChange
+		assertTrue("MockCustomer should have received msgHereIsYourChange: "
+			+ customer1.log.toString(), customer1.log.containsString("Received msgHereIsYourChange"));
+		// customer2 should not have received msgHereIsYourChange yet
+		assertFalse("MockCustomer should have received msgHereIsYourChange: "
+			+ customer2.log.toString(), customer2.log.containsString("Received msgHereIsYourChange"));
+		
+		cashier.pickAndExecuteAnAction();
+		
+		// Now customer2 should have received msgHereIsYourChange
+		assertTrue("MockCustomer should have received msgHereIsYourChange: "
+			+ customer2.log.toString(), customer2.log.containsString("Received msgHereIsYourChange"));
+	}
+	
+	/**
 	 * This tests the scenario in which a paying customer cannot
 	 * pay for his or her food. The cashier should tell the customer
 	 * to go wash dishes.
