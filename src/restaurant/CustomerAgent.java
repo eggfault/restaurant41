@@ -283,18 +283,33 @@ public class CustomerAgent extends Agent {
     /** Tells waiter the customer is ready to order food. */
     private void readyToOrder() {
 		print("I decided! " + waiter.getName() + ", I am ready to order.");
-		waiter.msgImReadyToOrder(this);
+		choice = menu.getRandomItem();
+		waiter.msgImReadyToOrder(this, choice);
 		waitForOrderAcquire();
-		orderFood();
+		print("I will have " + choice.getName());
+		waiter.waitForOrderRelease();
+		stateChanged();
     }
     
     /** Picks a random choice from the menu and sends it to the waiter
      * No longer called by scheduler; in v4.2, this is part of a multi-step action.
-     * It is now called by readyToOrder().
+     * It is now called by readyToOrder(). So both functions are all in one action.
      */
-    private void orderFood() {
-		choice = menu.getRandomItem();
-		print("I will have " + choice.getName());
+//    private void orderFood() {
+//		choice = menu.getRandomItem();
+//		print("I will have " + choice.getName());
+//		waiter.msgHereIsMyChoice(this, choice);
+//		stateChanged();
+//    }
+    
+    /** Same as orderFood() but avoids previous choice */
+    private void reorderFood() {
+    	// Pick a new choice
+    	MenuItem newChoice = menu.getRandomItem();
+		while(newChoice.equals(choice))
+			newChoice = menu.getRandomItem();
+		choice = newChoice;
+		print("(Reorder) I will have " + choice.getName());
 		waiter.msgHereIsMyChoice(this, choice);
 		stateChanged();
     }
@@ -306,17 +321,6 @@ public class CustomerAgent extends Agent {
 		stateChanged();
     }
     
-    /** Same as orderFood() but avoids previous choice */
-    private void reorderFood() {
-    	MenuItem newChoice = menu.getRandomItem();
-		while(newChoice.equals(choice))					// Not the best way to do this, but it works and is temporary (eventually should use indicies and mod to select new item)
-			newChoice = menu.getRandomItem();
-		choice = newChoice;
-		print("(Reorder) I will have " + choice.getName());
-		waiter.msgHereIsMyChoice(this, choice);
-		stateChanged();
-    }
-
     /** Starts a timer to simulate eating */
     private void eatFood() {
 		print("Eating for " + hungerLevel*1000 + " milliseconds.");

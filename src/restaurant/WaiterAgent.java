@@ -101,11 +101,12 @@ public class WaiterAgent extends Agent {
     /** Customer sends this when they are ready to order.
      * @param customer customer who is ready to order.
      */
-    public void msgImReadyToOrder(CustomerAgent customer) {
+    public void msgImReadyToOrder(CustomerAgent customer, MenuItem choice) {
 		//print("received msgImReadyToOrder from:"+customer);
 		for(int i=0; i < customers.size(); i++) {
 			if (customers.get(i).cmr == customer) {
 				customers.get(i).state = CustomerState.READY_TO_ORDER;
+				customers.get(i).choice = choice;
 				stateChanged();
 				return;
 		    }
@@ -255,12 +256,13 @@ public class WaiterAgent extends Agent {
 		    }
 	
 		    // Gives all pending orders to the cook
-		    for(MyCustomer c:customers) {
-				if(c.state == CustomerState.ORDER_PENDING) {
-				    giveOrderToCook(c);
-				    return true;
-				}
-		    }
+		    // Should no longer occur as of v4.2
+//		    for(MyCustomer c:customers) {
+//				if(c.state == CustomerState.ORDER_PENDING) {
+//				    giveOrderToCook(c);
+//				    return true;
+//				}
+//		    }
 	
 		    // Takes new orders for customers that are ready to order
 		    for(MyCustomer c:customers) {
@@ -314,15 +316,18 @@ public class WaiterAgent extends Agent {
     }
     
     /** Takes down the customers order 
+     * As of v4.2, this is now a multi-step action.
      * @param customer customer that is ready to order */
     private void takeOrder(MyCustomer customer) {
 		DoTakeOrder(customer); //animation
 		customer.state = CustomerState.NO_ACTION;
 		print("What would you like to order?");
-		//customer.cmr.msgWhatWouldYouLike();
+		//customer.cmr.msgWhatWouldYouLike(); // removed in v4.2
 		stateChanged();
 		print("Releasing customer semaphore...");
 		customer.cmr.waitForOrderRelease();
+		waitForOrderAcquire();
+		giveOrderToCook(customer);
     }
     
     private void tellCustomerToReorder(MyCustomer customer) {
@@ -342,22 +347,23 @@ public class WaiterAgent extends Agent {
     }
     
     /** Gives any pending orders to the cook 
+     * This is no longer called by the scheduler; it is part of a multi-step action.
+     * This will be called by takeOrder(...).
      * @param customer customer that needs food cooked */
     private void giveOrderToCook(MyCustomer customer) {
-		//In our animation the waiter does not move to the cook in
-		//order to give him an order. We assume some sort of electronic
-		//method implemented as our message to the cook. So there is no
-		//animation analog, and hence no DoXXX routine is needed.
+		// In our animation the waiter does not move to the cook in
+		// order to give him an order. We assume some sort of electronic
+		// method implemented as our message to the cook. So there is no
+		// animation analog, and hence no DoXXX routine is needed.
 		print("Giving " + customer.cmr + "'s choice of " + customer.choice.getName() + " to cook");
-	
 	
 		customer.state = CustomerState.NO_ACTION;
 		cook.msgHereIsAnOrder(this, customer.tableNum, customer.choice);
 		stateChanged();
 		
-		//Here's a little animation hack. We put the first two
-		//character of the food name affixed with a ? on the table.
-		//Simply let's us see what was ordered.
+		// Here's a little animation hack. We put the first two
+		// character of the food name affixed with a ? on the table.
+		// Simply let's us see what was ordered.
 		tables[customer.tableNum].takeOrder(customer.choice.getName().substring(0,2)+"?");
 		restaurant.placeFood(tables[customer.tableNum].foodX(),
 				     tables[customer.tableNum].foodY(),
