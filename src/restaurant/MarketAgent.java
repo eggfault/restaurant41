@@ -2,6 +2,7 @@ package restaurant;
 
 import agent.Agent;
 import java.util.*;
+
 import restaurant.CashierAgent.OrderStatus;
 import restaurant.interfaces.Market;
 import restaurant.layoutGUI.*;
@@ -35,7 +36,7 @@ public class MarketAgent extends Agent implements Market {
 		this.name = name;
 		
 		menu = new Menu();
-		orders = new ArrayList<Order>();
+		orders = Collections.synchronizedList(new ArrayList<Order>());
 		inventory = new Inventory(menu, MIN_ITEM_QUANTITY, MAX_ITEM_QUANTITY);
 		
 		money = 0;			// market will start with $0 (it won't spend any money, just collect it)
@@ -82,8 +83,10 @@ public class MarketAgent extends Agent implements Market {
 		// Find the matching order
 		for(Order o:orders) {
 			if(o.productIndex == productIndex) {
-				o.receivedPayment = payment;
-				o.status = OrderStatus.needToDeliver;
+				synchronized(orders) {
+					o.receivedPayment = payment;
+					o.status = OrderStatus.needToDeliver;
+				}
 				stateChanged();
 				return;
 			}

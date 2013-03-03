@@ -34,8 +34,8 @@ public class CashierAgent extends Agent{
 		this.name = name;
 		this.restaurant = restaurant;
 		
-		orders = new ArrayList<StockOrder>();
-		transactions = new ArrayList<Transaction>();
+		orders = Collections.synchronizedList(new ArrayList<StockOrder>());
+		transactions = Collections.synchronizedList(new ArrayList<Transaction>());
 		
 		money = 2500.00;			// cashier will start with $2500
     }
@@ -102,9 +102,10 @@ public class CashierAgent extends Agent{
 		// Find the matching order
 		for(StockOrder o:orders) {
 			if(o.productIndex == productIndex) {
-				o.cost = orderPrice;
-				stateChanged();
-				o.status = OrderStatus.needToPay;
+				synchronized(orders) {
+					o.cost = orderPrice;
+					o.status = OrderStatus.needToPay;
+				}
 				stateChanged();
 				return;
 			}
@@ -116,7 +117,9 @@ public class CashierAgent extends Agent{
 		// Find the matching order
 		for(StockOrder o:orders) {
 			if(o.productIndex == productIndex) {
-				o.status = OrderStatus.reorder;
+				synchronized(orders) {
+					o.status = OrderStatus.reorder;
+				}
 				stateChanged();
 				return;
 			}
@@ -227,20 +230,9 @@ public class CashierAgent extends Agent{
     	return "cashier " + getName();
     }
 
-    // Unused now. Only used for single market system.
-//    public void setMarket(MarketAgent market) {
-//    	this.market = market;
-//    }
-
 	public void setMarkets(List<Market> markets) {
 		this.markets = markets;
 	}
-    
-    /** Sets the list of markets (should be sent from RestaurantPanel) */
-    // This is currently unused now, I am just going to make 1 market for v4.1
-//	public void setMarkets(List<MarketAgent> markets) {
-//		this.markets = markets; 
-//	}
 }
 
 

@@ -1,9 +1,9 @@
 package restaurant;
 
 import agent.Agent;
-import java.util.Timer;
-import java.util.TimerTask;
+
 import java.util.*;
+
 import restaurant.layoutGUI.*;
 import java.awt.Color;
 
@@ -45,8 +45,8 @@ public class CookAgent extends Agent {
 		this.restaurant = restaurant;
 		this.cashier = cashier;
 		
-		orders  = new ArrayList<FoodOrder>();
-		deliveries = new ArrayList<Delivery>();
+		orders  = Collections.synchronizedList(new ArrayList<FoodOrder>());
+		deliveries = Collections.synchronizedList(new ArrayList<Delivery>());
 		// Create the restaurant's inventory.
 		menu = new Menu();
 		inventory = new Inventory(menu, MIN_ITEM_QUANTITY, MAX_ITEM_QUANTITY);
@@ -93,7 +93,9 @@ public class CookAgent extends Agent {
 		// If there exists an order o whose status is done, place o.
 		for(FoodOrder o:orders) {
 		    if(o.status == OrderStatus.done) {
-				placeOrder(o);
+		    	synchronized(orders) {
+		    		placeOrder(o);
+		    	}
 				return true;
 		    }
 		}
@@ -101,7 +103,9 @@ public class CookAgent extends Agent {
 		// If there exists an order o whose status is pending, cook o.
 		for(FoodOrder o:orders) {
 		    if(o.status == OrderStatus.pending) {
-				cookOrder(o);
+		    	synchronized(orders) {
+		    		cookOrder(o);
+		    	}
 				return true;
 		    }
 		}
@@ -109,7 +113,9 @@ public class CookAgent extends Agent {
 		// Process deliveries
 		for(Delivery d:deliveries) {
 			// There is only one status; all deliveries are removed from the list after being processed
-			processDelivery(d);
+			synchronized(deliveries) {
+				processDelivery(d);
+			}
 			return true;
 		}
 		

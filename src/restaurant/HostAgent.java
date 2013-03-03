@@ -56,12 +56,10 @@ public class HostAgent extends Agent {
     }
     
     // List of all the customers that need a table
-    private List<MyCustomer> waitList =
-		Collections.synchronizedList(new ArrayList<MyCustomer>());
+    private List<MyCustomer> waitList = Collections.synchronizedList(new ArrayList<MyCustomer>());
 
     // List of all waiter that exist.
-    private List<MyWaiter> waiters =
-		Collections.synchronizedList(new ArrayList<MyWaiter>());
+    private List<MyWaiter> waiters = Collections.synchronizedList(new ArrayList<MyWaiter>());
     private int nextWaiter = 0; // The next waiter that needs a customer
     
     // List of all the tables
@@ -78,7 +76,7 @@ public class HostAgent extends Agent {
 		this.nTables = ntables;
 		tables = new Table[nTables];
 	
-		for(int i=0; i < nTables; i++) {
+		for(int i = 0; i < nTables; i++) {
 		    tables[i] = new Table(i);
 		}
 		this.name = name;
@@ -112,10 +110,10 @@ public class HostAgent extends Agent {
 		// Find customer and remove him from the waitlist
 		MyCustomer tc = new MyCustomer(customer);
 		for(MyCustomer c:waitList) {
-			synchronized(waitList) {
-				if(c.cmr.equals(customer))
+			if(c.cmr.equals(customer))
+				synchronized(waitList) {
 					tc = c;
-			}
+				}
 		}
 		waitList.remove(tc);
 		// Some parting words </3
@@ -170,11 +168,13 @@ public class HostAgent extends Agent {
     	for(MyWaiter w:waiters) {
 			if(w.wantsABreak) {
 				// Waiter wants a break, check if the restaurant is busy
-				if(waiters.size() > waitList.size()) {			// use a more sophisticated check later
-					tellWaiterToTakeABreak(w);
-				}
-				else {
-					denyWaiterABreak(w);
+				synchronized(waiters) {
+					if(waiters.size() > waitList.size()) {			// use a more sophisticated check later
+						tellWaiterToTakeABreak(w);
+					}
+					else {
+						denyWaiterABreak(w);
+					}
 				}
 			}
 		}
