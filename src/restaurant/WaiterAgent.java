@@ -104,8 +104,7 @@ public class WaiterAgent extends Agent {
     public void msgImReadyToOrder(CustomerAgent customer) {
 		//print("received msgImReadyToOrder from:"+customer);
 		for(int i=0; i < customers.size(); i++) {
-			    //if(customers.get(i).cmr.equals(customer)) {
-			    if (customers.get(i).cmr == customer){
+			if (customers.get(i).cmr == customer) {
 				customers.get(i).state = CustomerState.READY_TO_ORDER;
 				stateChanged();
 				return;
@@ -319,8 +318,11 @@ public class WaiterAgent extends Agent {
     private void takeOrder(MyCustomer customer) {
 		DoTakeOrder(customer); //animation
 		customer.state = CustomerState.NO_ACTION;
-		customer.cmr.msgWhatWouldYouLike();
+		print("What would you like to order?");
+		//customer.cmr.msgWhatWouldYouLike();
 		stateChanged();
+		print("Releasing customer semaphore...");
+		customer.cmr.waitForOrderRelease();
     }
     
     private void tellCustomerToReorder(MyCustomer customer) {

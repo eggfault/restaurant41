@@ -169,17 +169,19 @@ public class CustomerAgent extends Agent {
 		if (state == AgentState.SeatedWithMenu) {
 		    if (event == AgentEvent.decidedChoice)	{
 				readyToOrder();
-				state = AgentState.WaiterImReadyToOrder;
-				return true;
-		    }
-		}
-		if (state == AgentState.WaiterImReadyToOrder) {
-		    if (event == AgentEvent.waiterToTakeOrder)	{
-				orderFood();
 				state = AgentState.WaitingForFood;
+				//state = AgentState.WaiterImReadyToOrder;
 				return true;
 		    }
 		}
+		// This is no longer used in v4.2, since it is handled in a multi-step action
+//		if (state == AgentState.WaiterImReadyToOrder) {
+//		    if (event == AgentEvent.waiterToTakeOrder)	{
+//				orderFood();
+//				state = AgentState.WaitingForFood;
+//				return true;
+//		    }
+//		}
 		if (state == AgentState.WaitingForFood) {
 		    if (event == AgentEvent.foodDelivered) {
 				eatFood();
@@ -280,8 +282,20 @@ public class CustomerAgent extends Agent {
     
     /** Tells waiter the customer is ready to order food. */
     private void readyToOrder() {
-		print("I decided!");
+		print("I decided! " + waiter.getName() + ", I am ready to order.");
 		waiter.msgImReadyToOrder(this);
+		waitForOrderAcquire();
+		orderFood();
+    }
+    
+    /** Picks a random choice from the menu and sends it to the waiter
+     * No longer called by scheduler; in v4.2, this is part of a multi-step action.
+     * It is now called by readyToOrder().
+     */
+    private void orderFood() {
+		choice = menu.getRandomItem();
+		print("I will have " + choice.getName());
+		waiter.msgHereIsMyChoice(this, choice);
 		stateChanged();
     }
     
@@ -289,14 +303,6 @@ public class CustomerAgent extends Agent {
     private void readyToPay() {
 		print("I am ready to pay.");
 		waiter.msgImReadyToPay(this);
-		stateChanged();
-    }
-    
-    /** Picks a random choice from the menu and sends it to the waiter */
-    private void orderFood() {
-		choice = menu.getRandomItem();
-		print("I will have " + choice.getName());
-		waiter.msgHereIsMyChoice(this, choice);
 		stateChanged();
     }
     
@@ -373,6 +379,7 @@ public class CustomerAgent extends Agent {
     private void leaveRestaurantNonNormative() {
 		print("Leaving the restaurant.");
 		guiCustomer.leave(); //for the animation
+		waiter.msgDoneEatingAndLeaving(this);
 		isHungry = false;
 		stateChanged();
 		gui.setCustomerEnabled(this); //Message to gui to enable hunger button

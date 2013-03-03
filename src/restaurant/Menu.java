@@ -6,10 +6,10 @@ public class Menu {
     private MenuItem choices[] = new MenuItem[]
 	{
     	// name, price, cookTime
-		new MenuItem("Steak", 15.99, 5),
-		new MenuItem("Chicken", 10.99, 4), 
-		new MenuItem("Salad", 5.99, 2),
-		new MenuItem("Pizza", 8.99, 3),
+		new MenuItem("Steak", 15.99, 1),//5),
+		new MenuItem("Chicken", 10.99, 1),//4), 
+		new MenuItem("Salad", 5.99, 1),//2),
+		new MenuItem("Pizza", 8.99, 1),//3),
     };
     
     public Menu(){}

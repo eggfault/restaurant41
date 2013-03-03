@@ -8,6 +8,8 @@ import java.util.concurrent.*;
 /** Base class for simple agents */
 public abstract class Agent {
 	Semaphore stateChange = new Semaphore(1,true);//binary semaphore, fair
+	Semaphore waitForOrder = new Semaphore(0,true);
+	
 	private AgentThread agentThread;
 
 	protected Agent() {
@@ -17,6 +19,26 @@ public abstract class Agent {
 	 * the agent to do something. */
 	protected void stateChanged() {
 		stateChange.release(); 
+	}
+	
+	/**
+	 * Acquires for waitForOrder semaphore
+	 */
+	public void waitForOrderAcquire() {
+		try {
+			waitForOrder.acquire();
+		} catch (InterruptedException e) {
+			// no action - expected when stopping or when deadline changed
+		} catch (Exception e) {
+			print("Unexpected exception caught in Agent thread:", e);
+		}
+	}
+	
+	/**
+	 * Releases for waitForOrder semaphore
+	 */
+	public void waitForOrderRelease() {
+		waitForOrder.release();
 	}
 
 	/** Agents must implement this scheduler to perform any actions appropriate for the
