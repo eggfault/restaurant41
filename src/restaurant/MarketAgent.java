@@ -71,7 +71,7 @@ public class MarketAgent extends Agent {
     
     // *** MESSAGES ***
     /** Cashier sends this when he places an order
-     * @param cashier cashier who is paying the cashier. */
+     * @param cashier cashier who is paying the market. */
     public void msgRequestOrder(CashierAgent cashier, int productIndex, int quantity) {
     	// Find product with the specified name
     	orders.add(new Order(cashier, productIndex, quantity));
