@@ -2,6 +2,7 @@ package restaurant.gui;
 
 import restaurant.*;
 import astar.*;
+import restaurant.interfaces.Market;
 import restaurant.layoutGUI.*;
 import java.util.concurrent.*; 
 
@@ -43,7 +44,7 @@ public class RestaurantPanel extends JPanel {
 	private CookAgent cook = new CookAgent("Spongebob", restaurant, cashier);	
 	private Vector<CustomerAgent> customers = new Vector<CustomerAgent>();
 	private Vector<WaiterAgent> waiters = new Vector<WaiterAgent>();
-	private java.util.List<MarketAgent> markets = new ArrayList<MarketAgent>();
+	private java.util.List<Market> markets = new ArrayList<Market>();
 	private RevolvingStandMonitor revolvingStand = new RevolvingStandMonitor();
 	//private MarketAgent market = new MarketAgent("Market");
 

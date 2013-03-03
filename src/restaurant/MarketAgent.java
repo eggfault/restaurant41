@@ -1,17 +1,16 @@
 package restaurant;
 
 import agent.Agent;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.*;
 import restaurant.CashierAgent.OrderStatus;
+import restaurant.interfaces.Market;
 import restaurant.layoutGUI.*;
 
 /** Market agent for restaurant.
  *  Is provider of food for the cook.
  *  Only interacts directly with the cashier.
  */
-public class MarketAgent extends Agent {
+public class MarketAgent extends Agent implements Market {
 	// Constants
 	final private int MIN_ITEM_QUANTITY = 0;
     final private int MAX_ITEM_QUANTITY = 10;

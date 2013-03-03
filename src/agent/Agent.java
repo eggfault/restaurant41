@@ -133,9 +133,9 @@ public abstract class Agent {
 		}
 	}
 	
-	protected double cash(double d) {
-	    DecimalFormat dec2 = new DecimalFormat("#.##");
-	    return Double.valueOf(dec2.format(d));
+	protected String cash(double d) {
+	    DecimalFormat dec2 = new DecimalFormat("0.00");
+	    return dec2.format(d);
 	}
 }
 

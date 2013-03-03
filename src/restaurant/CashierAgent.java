@@ -3,8 +3,8 @@ package restaurant;
 import agent.Agent;
 import java.util.*;
 
-import restaurant.CookAgent.OrderStatus;
 import restaurant.interfaces.Customer;
+import restaurant.interfaces.Market;
 import restaurant.layoutGUI.*;
 
 /** Cashier agent for restaurant.
@@ -23,7 +23,7 @@ public class CashierAgent extends Agent{
     Restaurant restaurant; 						// Gui layout
     //private List<MarketAgent> markets;			// List of markets to order food from (unused in v4.1)
     //private MarketAgent market;						// Market to order food from
-	private List<MarketAgent> markets;					// Markets to order food from
+	private List<Market> markets;					// Markets to order food from
 
     /** Constructor for CashierAgent class
      * @param name name of the cashier
@@ -97,7 +97,7 @@ public class CashierAgent extends Agent{
 	}
     
     /** Sent by a market after cashier requests an order */
-    public void msgHereIsYourOrderInvoice(MarketAgent market, int productIndex, double orderPrice) {
+    public void msgHereIsYourOrderInvoice(Market market, int productIndex, double orderPrice) {
 		print("Received invoice from " + market.getName() + " for a price of $" + cash(orderPrice));
 		// Find the matching order
 		for(StockOrder o:orders) {
@@ -178,7 +178,7 @@ public class CashierAgent extends Agent{
     
     private void handleTransaction(Transaction transaction) {
     	double change = (double)Math.round((transaction.payment - transaction.bill) * 100) / 100;		// rounds the change to decimal places
-    	print(transaction.customer.getName() + " paid cashier. Change due is $" + change);
+    	print(transaction.customer.getName() + " paid cashier. Change due is $" + cash(change));
     	money += transaction.payment;
     	transaction.customer.msgHereIsYourChange(change);
     	transactions.remove(transaction);
@@ -232,7 +232,7 @@ public class CashierAgent extends Agent{
 //    	this.market = market;
 //    }
 
-	public void setMarkets(List<MarketAgent> markets) {
+	public void setMarkets(List<Market> markets) {
 		this.markets = markets;
 	}
     
