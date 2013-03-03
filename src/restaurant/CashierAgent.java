@@ -124,7 +124,7 @@ public class CashierAgent extends Agent{
 	}
     
     // *** SCHEDULER ***
-    protected boolean pickAndExecuteAnAction() {
+    public boolean pickAndExecuteAnAction() {
     	
     	for(Transaction t:transactions) {
 		    if(t.status == TransactionStatus.pending) {
@@ -220,6 +220,11 @@ public class CashierAgent extends Agent{
 	/** Returns the name of the cashier */
     public String getName() {
         return name;
+    }
+    
+    /** @return the string representation of the class */
+    public String toString() {
+    	return "cashier " + getName();
     }
 
     // Unused now. Only used for single market system.

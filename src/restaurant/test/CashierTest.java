@@ -25,8 +25,21 @@ public class CashierTest extends TestCase {
 		// Create a mock customer
 		MockCustomer customer = new MockCustomer("Customer1");
 		
-		// The customer pays the cashier
-		cashier.msgPayForFood(customer, 4.50, 4.50);
+		// The customer pays the cashier $5.00 for a bill worth $4.50
+		cashier.msgPayForFood(customer, 4.50, 5.00);
+		
+		// Check for firing of actions from message handler
+		assertEquals("Mock Customer should have an empty event log before the Cashier's scheduler is called. " +
+				"Instead, the mock customer's event log reads: " + customer.log.toString(), 0, customer.log.size());
+		
+		cashier.pickAndExecuteAnAction();
+		
+		// Now check with assert statements to see if the scheduler did what it was supposed to
+		assertTrue(
+				"Mock customer should have received message containing change due: "
+						+ customer.log.toString(), customer.log.containsString("Received msgHereIsYourChange"));
+		assertEquals(
+				"Only 1 message should have been sent to the customer. Event log: "
+						+ customer.log.toString(), 1, customer.log.size());
 	}
-
 }
