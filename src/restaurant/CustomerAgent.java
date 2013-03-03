@@ -287,6 +287,7 @@ public class CustomerAgent extends Agent {
     /** Tells waiter the customer is ready to order food. */
     private void readyToOrder() {
 		print("I decided! " + waiter.getName() + ", I am ready to order.");
+		// Pick a choice
 		choice = menu.getRandomItem();
 		waiter.msgImReadyToOrder(this, choice);
 		waitForOrderAcquire();

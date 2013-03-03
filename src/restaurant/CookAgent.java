@@ -15,7 +15,7 @@ import java.awt.Color;
  */
 public class CookAgent extends Agent {
 	// Constants
-    final private int MIN_ITEM_QUANTITY = 3;
+    final private int MIN_ITEM_QUANTITY = 0;
     final private int MAX_ITEM_QUANTITY = 6;
     final private int LOW_STOCK = 4;				// When the stock is <= LOW_STOCK, an order for more will be placed
     final private int STOCK_ORDER_QUANTITY = 3;		// How many more of an item to place in an order when it runs low

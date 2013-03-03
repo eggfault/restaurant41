@@ -260,13 +260,15 @@ public class WaiterAgent extends Agent {
 		    }
 	
 		    // Gives all pending orders to the cook
-		    // Should no longer occur as of v4.2
-//		    for(MyCustomer c:customers) {
-//				if(c.state == CustomerState.ORDER_PENDING) {
-//				    giveOrderToCook(c);
-//				    return true;
-//				}
-//		    }
+		    // This no longer occurs normally in v4.2
+		    // Ordering is handled in a multi-step action
+		    // However, this is still used for RE-ordering
+		    for(MyCustomer c:customers) {
+				if(c.state == CustomerState.ORDER_PENDING) {
+				    giveOrderToCook(c);
+				    return true;
+				}
+		    }
 	
 		    // Takes new orders for customers that are ready to order
 		    for(MyCustomer c:customers) {
