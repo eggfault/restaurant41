@@ -84,7 +84,7 @@ public class CashierAgent extends Agent{
     }
     
     /** Sent by customer when he cannot pay for the food he already ordered and ate */
-	public void msgIDoNotHaveEnoughMoney(CustomerAgent customer, double bill, double payment) {
+	public void msgIDoNotHaveEnoughMoney(Customer customer, double bill, double payment) {
 		transactions.add(new Transaction(customer, bill, payment, TransactionStatus.failedToPay));
 		stateChanged();
 	}
