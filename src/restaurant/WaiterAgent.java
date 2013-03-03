@@ -64,6 +64,7 @@ public class WaiterAgent extends Agent {
     Position originalPosition;
     Table[] tables; //the gui tables
 	private RestaurantGui gui;
+	private RevolvingStandMonitor revolvingStand;
     
 
     /** Constructor for WaiterAgent class
@@ -566,5 +567,10 @@ public class WaiterAgent extends Agent {
     public boolean isOnBreak() {
     	return onBreak;
     }
+    
+    /** Gives the waiter access to the revolving stand */
+	public void setRevolvingStand(RevolvingStandMonitor revolvingStand) {
+		this.revolvingStand = revolvingStand;
+	}
 }
 

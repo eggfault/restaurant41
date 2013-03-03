@@ -17,25 +17,22 @@ public class CookAgent extends Agent {
 	// Constants
     final private int MIN_ITEM_QUANTITY = 3;
     final private int MAX_ITEM_QUANTITY = 6;
-    final private int LOW_STOCK = 4;				// when the stock is <= LOW_STOCK, an order for more will be placed
-    final private int STOCK_ORDER_QUANTITY = 3;		// how many more of an item to place in an order when it runs low
+    final private int LOW_STOCK = 4;				// When the stock is <= LOW_STOCK, an order for more will be placed
+    final private int STOCK_ORDER_QUANTITY = 3;		// How many more of an item to place in an order when it runs low
+    final private int CHECK_REVOLVING_STAND_DELAY = 5000;	// How long to wait in between revolving stand checks
 	
     // List of all the orders
     private List<Order> orders;
     private List<Delivery> deliveries;
     private Inventory inventory;
-    public enum OrderStatus {pending, cooking, done}; // order status
-    
-    // Name of the cook
-    private String name;
-    
-    private Menu menu;
-    
+    public enum OrderStatus {pending, cooking, done}; 	// Order status
+    private String name;								// Name of the cook
+    private Menu menu;    
     CashierAgent cashier;
-
-    // Timer for simulation
-    Timer timer = new Timer();
-    Restaurant restaurant; //Gui layout
+    Timer timer = new Timer();							// Timer for simulation
+    Restaurant restaurant;								// UI layout
+	private RevolvingStandMonitor revolvingStand;
+	private boolean checkRevolvingStand;
 
     /** Constructor for CookAgent class
      * @param name name of the cook
@@ -55,6 +52,8 @@ public class CookAgent extends Agent {
 		inventory = new Inventory(menu, MIN_ITEM_QUANTITY, MAX_ITEM_QUANTITY);
 		// Initial check of stock for low items
 		checkInventoryForLowStock();
+		// Check the revolving stand periodically
+		checkRevolvingStand = true;
     }
     
     /** Private class to store order information.
@@ -143,9 +142,14 @@ public class CookAgent extends Agent {
 			return true;
 		}
 		
-		//we have tried all our rules (in this case only one) and found
-		//nothing to do. So return false to main loop of abstract agent
-		//and wait.
+		// Check the revolving stand if the checking delay has expired
+		if(checkRevolvingStand) {
+			checkRevolvingStand();
+		}
+		
+		// We have tried all our rules (in this case only one) and found
+		// nothing to do. So return false to main loop of abstract agent
+		// and wait.
 		return false;
     }
     
@@ -163,7 +167,10 @@ public class CookAgent extends Agent {
      * @param order
      */
     private void cookOrder(Order order) {
+    	// Animation routine
 		DoCooking(order);
+		// Now check the inventory to see if anything is running low
+		checkInventoryForLowStock();
 		order.status = OrderStatus.cooking;
     }
 
@@ -172,7 +179,31 @@ public class CookAgent extends Agent {
 		order.waiter.msgOrderIsReady(order.tableNum, order.food);
 		orders.remove(order);
     }
-
+    
+    private void checkInventoryForLowStock() {
+    	print("Checking inventory for low stock...");
+    	for(int i = 0; i < menu.getLength(); i ++) {
+    		String menuItemName = menu.itemAtIndex(i).getName();
+    		if(inventory.getQuantity(menuItemName) <= LOW_STOCK && !inventory.alreadyOrdered(menuItemName)) {
+    			// Order more of this item!
+    			print(cashier.getName() + ", please order some more " + menuItemName);
+    			cashier.msgOrderMoreOf(i, STOCK_ORDER_QUANTITY);
+    			inventory.setOrdered(menuItemName, true);
+    		}
+    	}
+    }
+    
+    private void checkRevolvingStand() {
+    	print("Checking revolving stand for pending orders...");
+    	checkRevolvingStand = false;
+    	timer.schedule(new TimerTask() {
+    		public void run() {
+    			checkRevolvingStand = true;
+    			stateChanged();
+    		}
+    	}, CHECK_REVOLVING_STAND_DELAY);
+    }
+    
     // *** EXTRA -- all the simulation routines***
 
     /** Returns the name of the cook */
@@ -205,8 +236,6 @@ public class CookAgent extends Agent {
 			// Tell waiter the food is out of stock (note: this is for if the customer orders 1 item only, as required in v4.1)
 			order.waiter.msgOutOfStock(order.tableNum);
 		}
-		// Now check the inventory to see if anything is running low
-		checkInventoryForLowStock();
     }
     
     public void DoPlacement(Order order) {
@@ -214,23 +243,14 @@ public class CookAgent extends Agent {
 		order.food.placeOnCounter();
     }
     
-    private void checkInventoryForLowStock() {
-    	print("Checking inventory for low stock...");
-    	for(int i = 0; i < menu.getLength(); i ++) {
-    		String menuItemName = menu.itemAtIndex(i).getName();
-    		if(inventory.getQuantity(menuItemName) <= LOW_STOCK && !inventory.alreadyOrdered(menuItemName)) {
-    			// Order more of this item!
-    			print(cashier.getName() + ", please order some more " + menuItemName);
-    			cashier.msgOrderMoreOf(i, STOCK_ORDER_QUANTITY);
-    			inventory.setOrdered(menuItemName, true);
-    		}
-    	}
-    }
-    
     // Unused: replaced by a parameter in CookAgent's constructor as a bugfix for the initial inventory stock check
     public void setCashier(CashierAgent cashier) {
     	this.cashier = cashier;
     }
+
+	public void setRevolvingStand(RevolvingStandMonitor revolvingStand) {
+		this.revolvingStand = revolvingStand;
+	}
 }
 
 
