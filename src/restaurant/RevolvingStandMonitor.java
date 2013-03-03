@@ -3,7 +3,7 @@ package restaurant;
 import java.util.Vector;
 
 public class RevolvingStandMonitor extends Object {
-    private final int MAX_SIZE = 5;
+    private final int MAX_SIZE = 3;
     private int count = 0;
     private Vector<FoodOrder> contents;
     
@@ -12,9 +12,9 @@ public class RevolvingStandMonitor extends Object {
     }
     
     synchronized public void insert(FoodOrder data) {
-        while (count == MAX_SIZE) {
+        while(count == MAX_SIZE) {
             try { 
-                print("Full, waiting");
+                print("Full, waiting...");
                 wait(5000);                         // Full, wait to add
             } catch (InterruptedException ex) {};
         }
@@ -22,7 +22,7 @@ public class RevolvingStandMonitor extends Object {
         insertItem(data);
         count++;
         if(count == 1) {
-        	print("Not Empty, notify");
+        	print("Not empty, notify!");
             notify();								// Not full, notify a
             										// waiting consumer
         }
@@ -32,14 +32,14 @@ public class RevolvingStandMonitor extends Object {
     	FoodOrder data;
         while(count == 0)
             try { 
-                print("Empty, waiting");
+                print("Empty, waiting...");
                 wait(5000);                         // Empty, wait to consume
             } catch (InterruptedException ex) {};
 
         data = removeItem();
         count--;
         if(count == MAX_SIZE-1){ 
-            print("Not full, notify");
+            print("Not full, notify!");
             notify();                               // Not full, notify a 
                                                     // waiting producer
         }

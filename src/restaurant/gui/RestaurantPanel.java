@@ -20,6 +20,9 @@ public class RestaurantPanel extends JPanel {
 	
 	// Number of agents
 	final private int NUMBER_OF_MARKETS = 5;
+	
+	// Revolving stand to non-revolving stand waiter ratio
+	final private float REVOLVING_STAND_RATIO = 0.5f;
 
 	//**Decide how many tables to have
 	private int nTables = 4;
@@ -190,6 +193,8 @@ public class RestaurantPanel extends JPanel {
 			w.setHost(host);
 			w.setCook(cook);
 			w.setRevolvingStand(revolvingStand);
+			if(Math.random() < REVOLVING_STAND_RATIO)
+				w.useRevolvingStand();
 			host.setWaiter(w);
 			waiters.add(w);
 			w.startThread();

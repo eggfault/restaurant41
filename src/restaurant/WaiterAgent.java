@@ -47,10 +47,10 @@ public class WaiterAgent extends Agent {
 		}
     }
 
-    //Name of waiter
+    // Name of waiter
     private String name;
 
-    //All the customers that this waiter is serving
+    // All the customers that this waiter is serving
     private List<MyCustomer> customers = new ArrayList<MyCustomer>();
 
     private HostAgent host;
@@ -58,13 +58,14 @@ public class WaiterAgent extends Agent {
 
     //Animation Variables
     AStarTraversal aStar;
-    Restaurant restaurant; //the gui layout
+    Restaurant restaurant; 							//the gui layout
     GuiWaiter guiWaiter; 
     Position currentPosition; 
     Position originalPosition;
-    Table[] tables; //the gui tables
+    Table[] tables; 								//the gui tables
 	private RestaurantGui gui;
 	private RevolvingStandMonitor revolvingStand;
+	private boolean useRevolvingStand;				// does the waiter use the revolving stand?
     
 
     /** Constructor for WaiterAgent class
@@ -77,13 +78,15 @@ public class WaiterAgent extends Agent {
 		this.name = name;
 		this.gui = gui;
 	
-		//initialize all the animation objects
+		useRevolvingStand = false;				// don't use the revolving stand by default
+		
+		// Initialize all the animation objects
 		this.aStar = aStar;
-		this.restaurant = restaurant;//the layout for astar
+		this.restaurant = restaurant;			// the layout for Astar
 		guiWaiter = new GuiWaiter(name.substring(0,2), new Color(255, 0, 0), restaurant);
 		currentPosition = new Position(guiWaiter.getX(), guiWaiter.getY());
 	        currentPosition.moveInto(aStar.getGrid());
-		originalPosition = currentPosition;//save this for moving into
+		originalPosition = currentPosition;		// save this for moving into
 		this.tables = tables;
     } 
 
@@ -356,12 +359,17 @@ public class WaiterAgent extends Agent {
 		// order to give him an order. We assume some sort of electronic
 		// method implemented as our message to the cook. So there is no
 		// animation analog, and hence no DoXXX routine is needed.
-		print("Giving " + customer.cmr + "'s choice of " + customer.choice.getName() + " to cook");
+		
 	
 		customer.state = CustomerState.NO_ACTION;
-		// Add customer's choice to the revolving stand.
-		revolvingStand.insert(new FoodOrder(this, customer.tableNum, customer.choice));
-		//cook.msgHereIsAnOrder(this, customer.tableNum, customer.choice); // temporarily disabled for v4.2 revolving stand tests!
+		if(useRevolvingStand) {
+			print("Adding "+ customer.cmr + "'s choice of " + customer.choice.getName() + " to the revolving stand");
+			revolvingStand.insert(new FoodOrder(this, customer.tableNum, customer.choice));	// add customer's choice to the revolving stand.
+		}
+		else {
+			print("Giving " + customer.cmr + "'s choice of " + customer.choice.getName() + " to cook");
+			cook.msgHereIsAnOrder(this, customer.tableNum, customer.choice); 				// use good 'ol messaging
+		}
 		stateChanged();
 		
 		// Here's a little animation hack. We put the first two
@@ -573,6 +581,12 @@ public class WaiterAgent extends Agent {
     /** Gives the waiter access to the revolving stand */
 	public void setRevolvingStand(RevolvingStandMonitor revolvingStand) {
 		this.revolvingStand = revolvingStand;
+	}
+
+	/** Sets the waiter to use the revolving stand only */
+	public void useRevolvingStand() {
+		useRevolvingStand = true;
+		name += "(R)";				// Add a visual indication
 	}
 }
 
