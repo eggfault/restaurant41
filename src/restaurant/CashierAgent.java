@@ -112,7 +112,7 @@ public class CashierAgent extends Agent{
 	}
     
     /** Sent by market if the market is out of stock of the specific product */
-	public void msgOutOfStock(MarketAgent marketAgent, int productIndex) {
+	public void msgOutOfStock(Market marketAgent, int productIndex) {
 		// Find the matching order
 		for(StockOrder o:orders) {
 			if(o.productIndex == productIndex) {
