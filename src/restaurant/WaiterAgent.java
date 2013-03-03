@@ -359,7 +359,9 @@ public class WaiterAgent extends Agent {
 		print("Giving " + customer.cmr + "'s choice of " + customer.choice.getName() + " to cook");
 	
 		customer.state = CustomerState.NO_ACTION;
-		cook.msgHereIsAnOrder(this, customer.tableNum, customer.choice);
+		// Add customer's choice to the revolving stand.
+		revolvingStand.insert(new FoodOrder(this, customer.tableNum, customer.choice));
+		//cook.msgHereIsAnOrder(this, customer.tableNum, customer.choice); // temporarily disabled for v4.2 revolving stand tests!
 		stateChanged();
 		
 		// Here's a little animation hack. We put the first two

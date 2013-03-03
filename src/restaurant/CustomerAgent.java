@@ -44,6 +44,7 @@ public class CustomerAgent extends Agent {
 	    {gotHungry, beingSeated, decidedChoice, waiterToTakeOrder, foodDelivered, doneEating,
     	waiterToGiveBill, donePaying, decidingAboutWaiting, washDishes};
     List<AgentEvent> events = new ArrayList<AgentEvent>();
+    private boolean hasAWaiter;
     
     /** Constructor for CustomerAgent class 
      * @param name name of the customer
@@ -55,6 +56,7 @@ public class CustomerAgent extends Agent {
 		this.name = name;
 		this.restaurant = restaurant;
 		this.money = 0;						// money is set in goingToRestaurant()
+		hasAWaiter = false;
 		guiCustomer = new GuiCustomer(name.substring(0,2), new Color(0,255,0), restaurant);
     }
     
@@ -64,6 +66,7 @@ public class CustomerAgent extends Agent {
 		this.name = name;
 		this.restaurant = restaurant;
 		this.money = 0;						// money is set in goingToRestaurant()
+		hasAWaiter = false;
 		guiCustomer = new GuiCustomer(name.substring(0,1), new Color(0,255,0), restaurant);
     }
     
@@ -81,6 +84,7 @@ public class CustomerAgent extends Agent {
     public void msgFollowMeToTable(WaiterAgent waiter, Menu menu) {
 		this.menu = menu;
 		this.waiter = waiter;
+		hasAWaiter = true;
 		print("Received msgFollowMeToTable from " + waiter);
 		events.add(AgentEvent.beingSeated);
 		stateChanged();
@@ -382,8 +386,9 @@ public class CustomerAgent extends Agent {
      * 3. The customer could not pay for food and just finished his punishment */
     private void leaveRestaurantNonNormative() {
 		print("Leaving the restaurant.");
-		guiCustomer.leave(); //for the animation
-		waiter.msgDoneEatingAndLeaving(this);
+		guiCustomer.leave(); 	// for the animation
+		if(hasAWaiter)			// bugfix for null waiter
+			waiter.msgDoneEatingAndLeaving(this);
 		isHungry = false;
 		stateChanged();
 		gui.setCustomerEnabled(this); //Message to gui to enable hunger button

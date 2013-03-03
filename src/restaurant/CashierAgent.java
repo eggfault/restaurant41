@@ -17,7 +17,7 @@ public class CashierAgent extends Agent {
     private String name;						// Name of the cashier
     private List<Transaction> transactions;		// List of all the transactions
     private double money;							// Amount of money the cashier has
-    private List<Order> orders;					// Orders for more food from markets
+    private List<StockOrder> orders;					// Orders for more food from markets
     Timer timer = new Timer();					// Timer for simulations
     Restaurant restaurant; 						// Gui layout
     //private List<MarketAgent> markets;			// List of markets to order food from (unused in v4.1)
@@ -33,7 +33,7 @@ public class CashierAgent extends Agent {
 		this.name = name;
 		this.restaurant = restaurant;
 		
-		orders = new ArrayList<Order>();
+		orders = new ArrayList<StockOrder>();
 		transactions = new ArrayList<Transaction>();
 		
 		money = 2500.00;			// cashier will start with $2500
@@ -58,14 +58,14 @@ public class CashierAgent extends Agent {
 		}
     }
     
-    private class Order {
+    private class StockOrder {
     	public int marketIndex;
     	public int productIndex;
     	public int quantity;
     	public OrderStatus status;
     	public double cost;
     	
-    	public Order(int marketIndex, int productIndex, int quantity) {
+    	public StockOrder(int marketIndex, int productIndex, int quantity) {
     		this.marketIndex = marketIndex;
     		this.productIndex = productIndex;
     		this.quantity = quantity;
@@ -91,7 +91,7 @@ public class CashierAgent extends Agent {
     /** Sent by cook when requesting more of the specified MenuItem */
     public void msgOrderMoreOf(int productIndex, int requestedQuantity) {
     	int marketIndex = 0;		// always start with the first market
-		orders.add(new Order(marketIndex, productIndex, requestedQuantity));
+		orders.add(new StockOrder(marketIndex, productIndex, requestedQuantity));
 		stateChanged();
 	}
     
@@ -99,7 +99,7 @@ public class CashierAgent extends Agent {
     public void msgHereIsYourOrderInvoice(MarketAgent market, int productIndex, double orderPrice) {
 		print("Received invoice from " + market.getName() + " for a price of $" + cash(orderPrice));
 		// Find the matching order
-		for(Order o:orders) {
+		for(StockOrder o:orders) {
 			if(o.productIndex == productIndex) {
 				o.cost = orderPrice;
 				stateChanged();
@@ -113,7 +113,7 @@ public class CashierAgent extends Agent {
     /** Sent by market if the market is out of stock of the specific product */
 	public void msgOutOfStock(MarketAgent marketAgent, int productIndex) {
 		// Find the matching order
-		for(Order o:orders) {
+		for(StockOrder o:orders) {
 			if(o.productIndex == productIndex) {
 				o.status = OrderStatus.reorder;
 				stateChanged();
@@ -143,7 +143,7 @@ public class CashierAgent extends Agent {
 		    }
 		}
     	
-    	for(Order o:orders) {
+    	for(StockOrder o:orders) {
 		    if(o.status == OrderStatus.pending) {
 		    	synchronized(orders) {
 		    		placeOrder(o);
@@ -152,7 +152,7 @@ public class CashierAgent extends Agent {
 		    }
 		}
     	
-    	for(Order o:orders) {
+    	for(StockOrder o:orders) {
     		if(o.status == OrderStatus.needToPay) {
     			synchronized(orders) {
     				payForOrder(o);
@@ -161,7 +161,7 @@ public class CashierAgent extends Agent {
     		}
     	}
     	
-    	for(Order o:orders) {
+    	for(StockOrder o:orders) {
     		if(o.status == OrderStatus.reorder) {
     			synchronized(orders) {
     				reorder(o);
@@ -183,13 +183,13 @@ public class CashierAgent extends Agent {
     	transactions.remove(transaction);
 	}
     
-    private void placeOrder(Order order) {
+    private void placeOrder(StockOrder order) {
     	markets.get(order.marketIndex).msgRequestOrder(this, order.productIndex, order.quantity);
     	order.status = OrderStatus.requested;
     	stateChanged();
     }
     
-    private void reorder(final Order order) {
+    private void reorder(final StockOrder order) {
     	order.status = OrderStatus.requested;
     	order.marketIndex = (order.marketIndex+1) % markets.size(); 		// Try the next market
     	print("No worries, I will try " + markets.get(order.marketIndex).getName() + " to order instead! (1500 ms)");
@@ -200,7 +200,7 @@ public class CashierAgent extends Agent {
 		}, 1500);
     }
     
-    private void payForOrder(Order order) {
+    private void payForOrder(StockOrder order) {
     	double payment = order.cost;
     	money -= payment;
     	print("Paying market $" + cash(payment) + " for order!");

@@ -5,13 +5,13 @@ import java.util.Vector;
 public class RevolvingStandMonitor extends Object {
     private final int MAX_SIZE = 5;
     private int count = 0;
-    private Vector<MenuItem> contents;
+    private Vector<FoodOrder> contents;
     
     public RevolvingStandMonitor() {
-    	contents = new Vector<MenuItem>();
+    	contents = new Vector<FoodOrder>();
     }
     
-    synchronized public void insert(MenuItem data) {
+    synchronized public void insert(FoodOrder data) {
         while (count == MAX_SIZE) {
             try { 
                 print("Full, waiting");
@@ -28,8 +28,8 @@ public class RevolvingStandMonitor extends Object {
         }
     }
     
-    synchronized public MenuItem remove() {
-    	MenuItem data;
+    synchronized public FoodOrder remove() {
+    	FoodOrder data;
         while(count == 0)
             try { 
                 print("Empty, waiting");
@@ -46,12 +46,12 @@ public class RevolvingStandMonitor extends Object {
         return data;
     }
     
-    private void insertItem(MenuItem data) {
+    private void insertItem(FoodOrder data) {
     	contents.addElement(data);
     }
     
-    private MenuItem removeItem() {
-    	MenuItem data = (MenuItem)contents.firstElement();
+    private FoodOrder removeItem() {
+    	FoodOrder data = (FoodOrder)contents.firstElement();
     	contents.removeElementAt(0);
         return data;
     }

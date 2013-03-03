@@ -22,7 +22,7 @@ public class CookAgent extends Agent {
     final private int CHECK_REVOLVING_STAND_DELAY = 5000;	// How long to wait in between revolving stand checks
 	
     // List of all the orders
-    private List<Order> orders;
+    private List<FoodOrder> orders;
     private List<Delivery> deliveries;
     private Inventory inventory;
     public enum OrderStatus {pending, cooking, done}; 	// Order status
@@ -45,7 +45,7 @@ public class CookAgent extends Agent {
 		this.restaurant = restaurant;
 		this.cashier = cashier;
 		
-		orders  = new ArrayList<Order>();
+		orders  = new ArrayList<FoodOrder>();
 		deliveries = new ArrayList<Delivery>();
 		// Create the restaurant's inventory.
 		menu = new Menu();
@@ -54,35 +54,6 @@ public class CookAgent extends Agent {
 		checkInventoryForLowStock();
 		// Check the revolving stand periodically
 		checkRevolvingStand = true;
-    }
-    
-    /** Private class to store order information.
-     *  Contains the waiter, table number, food item,
-     *  cooktime and status.
-     */
-    private class Order {
-		public WaiterAgent waiter;
-		public int tableNum;
-		public MenuItem choice;
-		public OrderStatus status;
-		public Food food; //a gui variable
-	
-		/** Constructor for Order class 
-		 * @param waiter waiter that this order belongs to
-		 * @param tableNum identification number for the table
-		 * @param choice type of food to be cooked 
-		 */
-		public Order(WaiterAgent waiter, int tableNum, MenuItem choice) {
-		    this.waiter = waiter;
-		    this.choice = choice;
-		    this.tableNum = tableNum;
-		    this.status = OrderStatus.pending;
-		}
-	
-		/** Represents the object as a string */
-		public String toString() {
-		    return choice.getName() + " for " + waiter ;
-		}
     }
     
     /** Represents a delivery from the market for food ordered by the cashier */
@@ -106,7 +77,7 @@ public class CookAgent extends Agent {
      * @param choice type of food to be cooked
      */
     public void msgHereIsAnOrder(WaiterAgent waiter, int tableNum, MenuItem choice) {
-		orders.add(new Order(waiter, tableNum, choice));
+		orders.add(new FoodOrder(waiter, tableNum, choice));
 		stateChanged();
     }
     
@@ -120,7 +91,7 @@ public class CookAgent extends Agent {
     protected boolean pickAndExecuteAnAction() {
     	
 		// If there exists an order o whose status is done, place o.
-		for(Order o:orders) {
+		for(FoodOrder o:orders) {
 		    if(o.status == OrderStatus.done) {
 				placeOrder(o);
 				return true;
@@ -128,7 +99,7 @@ public class CookAgent extends Agent {
 		}
 		
 		// If there exists an order o whose status is pending, cook o.
-		for(Order o:orders) {
+		for(FoodOrder o:orders) {
 		    if(o.status == OrderStatus.pending) {
 				cookOrder(o);
 				return true;
@@ -166,7 +137,7 @@ public class CookAgent extends Agent {
 	/** Starts a timer for the order that needs to be cooked. 
      * @param order
      */
-    private void cookOrder(Order order) {
+    private void cookOrder(FoodOrder order) {
     	// Animation routine
 		DoCooking(order);
 		// Now check the inventory to see if anything is running low
@@ -174,7 +145,7 @@ public class CookAgent extends Agent {
 		order.status = OrderStatus.cooking;
     }
 
-    private void placeOrder(Order order) {
+    private void placeOrder(FoodOrder order) {
 		DoPlacement(order);
 		order.waiter.msgOrderIsReady(order.tableNum, order.food);
 		orders.remove(order);
@@ -195,6 +166,9 @@ public class CookAgent extends Agent {
     
     private void checkRevolvingStand() {
     	print("Checking revolving stand for pending orders...");
+    	FoodOrder newOrder = revolvingStand.remove();
+    	print("Removed " + newOrder.toString() + " from stand");
+    	orders.add(newOrder);
     	checkRevolvingStand = false;
     	timer.schedule(new TimerTask() {
     		public void run() {
@@ -211,7 +185,7 @@ public class CookAgent extends Agent {
         return name;
     }
 
-    private void DoCooking(final Order order) {
+    private void DoCooking(final FoodOrder order) {
 		print("Cooking: " + order + " for table:" + (order.tableNum+1));
 		
 		// Check if cook has any of the order in his inventory
@@ -224,7 +198,7 @@ public class CookAgent extends Agent {
 			order.food.cookFood();
 		
 			timer.schedule(new TimerTask() {
-			    public void run() {//this routine is like a message reception    
+			    public void run() {				//this routine is like a message reception    
 					order.status = OrderStatus.done;
 					stateChanged();
 			    }
@@ -238,8 +212,8 @@ public class CookAgent extends Agent {
 		}
     }
     
-    public void DoPlacement(Order order) {
-		print("Order finished: " + order + " for table:" + (order.tableNum+1));
+    public void DoPlacement(FoodOrder order) {
+		print("Order finished: " + order + " for table:" + (order.tableNum + 1));
 		order.food.placeOnCounter();
     }
     
