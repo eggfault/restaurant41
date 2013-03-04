@@ -79,6 +79,7 @@ public class CashierAgent extends Agent{
     /** Customer sends this when he is ready to pay.
      * @param customer customer who is paying the cashier. */
     public void msgPayForFood(Customer customer, double bill, double payment) {
+    	System.out.println("Debug: new transaction");
     	transactions.add(new Transaction(customer, bill, payment, TransactionStatus.pending));
     	stateChanged();
     }
@@ -131,45 +132,45 @@ public class CashierAgent extends Agent{
     	
     	for(Transaction t:transactions) {
 		    if(t.status == TransactionStatus.pending) {
-		    	synchronized(transactions) {
+		    	//synchronized(transactions) {
 		    		handleTransaction(t);
-		    	}
+		    	//}
 				return true;
 		    }
 		}
     	
     	for(Transaction t:transactions) {
 		    if(t.status == TransactionStatus.failedToPay) {
-		    	synchronized(transactions) {
+		    	//synchronized(transactions) {
 		    		punishCustomer(t);
-		    	}
+		    	//}
 				return true;
 		    }
 		}
     	
     	for(StockOrder o:orders) {
 		    if(o.status == OrderStatus.pending) {
-		    	synchronized(orders) {
+		    	//synchronized(orders) {
 		    		placeOrder(o);
-		    	}
+		    	//}
 				return true;
 		    }
 		}
     	
     	for(StockOrder o:orders) {
     		if(o.status == OrderStatus.needToPay) {
-    			synchronized(orders) {
+    			//synchronized(orders) {
     				payForOrder(o);
-    			}
+    			//}
     			return true;
     		}
     	}
     	
     	for(StockOrder o:orders) {
     		if(o.status == OrderStatus.reorder) {
-    			synchronized(orders) {
+    			//synchronized(orders) {
     				reorder(o);
-    			}
+    			//}
     			return true;
     		}
     	}

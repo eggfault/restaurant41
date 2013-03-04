@@ -30,12 +30,13 @@ public class RevolvingStandMonitor extends Object {
     
     synchronized public FoodOrder remove() {
     	FoodOrder data;
-        while(count == 0)
-            try { 
-                print("Empty, waiting...");
-                wait(5000);                         // Empty, wait to consume
-            } catch (InterruptedException ex) {};
-
+//        while(count == 0)
+//            try { 
+//                print("Empty, waiting...");
+//                wait(5000);                         // Empty, wait to consume
+//            } catch (InterruptedException ex) {};
+    	if(count == 0)
+    		return null;
         data = removeItem();
         count--;
         if(count == MAX_SIZE-1){ 

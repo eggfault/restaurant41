@@ -13,8 +13,8 @@ import restaurant.layoutGUI.*;
  */
 public class MarketAgent extends Agent implements Market {
 	// Constants
-	final private int MIN_ITEM_QUANTITY = 0;
-    final private int MAX_ITEM_QUANTITY = 10;
+	final private int MIN_ITEM_QUANTITY = 3;
+    final private int MAX_ITEM_QUANTITY = 6;
     final private int DELIVERY_TIME = 7500;
 	
 	public enum OrderStatus {requesting, waitingForPayment, needToDeliver, canceled};

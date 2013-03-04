@@ -1,6 +1,7 @@
 package restaurant;
 import java.awt.Color;
 import restaurant.gui.RestaurantGui;
+import restaurant.interfaces.Customer;
 import restaurant.layoutGUI.*;
 import agent.Agent;
 import java.util.Timer;
@@ -177,7 +178,7 @@ public class WaiterAgent extends Agent {
 
     /** Customer sends this when they are done eating.
      * @param customer customer who is leaving the restaurant. */
-    public void msgDoneEatingAndLeaving(CustomerAgent customer) {
+    public void msgDoneEatingAndLeaving(Customer customer) {
 		for(MyCustomer c:customers) {
 		    if(c.cmr.equals(customer)) {
 				c.state = CustomerState.IS_DONE;

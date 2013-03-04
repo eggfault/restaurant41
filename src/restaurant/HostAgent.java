@@ -3,6 +3,8 @@ package restaurant;
 import agent.Agent;
 import java.util.*;
 
+import restaurant.interfaces.Waiter;
+
 
 /** Host agent for restaurant.
  *  Keeps a list of all the waiters and tables.
@@ -121,10 +123,10 @@ public class HostAgent extends Agent {
 	}
 	
 	/** Sent by the waiter when he wants to take a break */
-	public void msgIWantToTakeABreak(WaiterAgent waiter) {
+	public void msgIWantToTakeABreak(WaiterAgent waiterAgent) {
 		// Find the matching waiter
 		for(MyWaiter w:waiters) {
-			if(w.wtr == waiter) {
+			if(w.wtr == waiterAgent) {
 				synchronized(waiters) {
 					w.wantsABreak = true;
 					return;
@@ -148,10 +150,10 @@ public class HostAgent extends Agent {
 	}
 	
 	/** Sent by the waiter if he is forced to take a break via the GUI */
-	public void msgIAmForcedToTakeABreak(WaiterAgent waiter) {
+	public void msgIAmForcedToTakeABreak(WaiterAgent waiterAgent) {
 		// Find the matching waiter
 		for(MyWaiter w:waiters) {
-			if(w.wtr == waiter) {
+			if(w.wtr == waiterAgent) {
 				synchronized(waiters) {
 					print("Well " + w.wtr.getName() + ", if it is the will of The User, then you shall take a break.");
 					w.working = false;
