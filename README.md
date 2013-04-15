@@ -1,4 +1,4 @@
 restaurant41
 ============
 
-RestaurantV4.1
+Java agent-based restaurant simulation with whitebox JUnit testing.
